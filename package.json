@@ -13,6 +13,8 @@
     "gulp-uglify": "~1.1.0"
   },
   "devDependencies": {
+    "cypress": "^7.4.0",
+    "cypress-for-wordpress": "^0.1.1",
     "del": "^6.0.0",
     "gulp": "^4.0.2",
     "gulp-minify-css": "^1.0.0",
@@ -22,7 +24,8 @@
   "scripts": {
     "registration-scripts": "gulp registration-scripts",
     "registration-styles": "gulp registration-styles",
-    "watch": "gulp watch"
+    "watch": "gulp watch",
+    "test:e2e": "cypress open"
   },
   "author": "Siim Kirjanen",
   "license": "GPLv2 or later"

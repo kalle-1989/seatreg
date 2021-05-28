@@ -1,0 +1,9 @@
+{
+    "wordpressVersion": "latest",
+    "wordpressPort": 8000,
+    "wordpressTheme": "twentytwenty",
+    "wordpressThemeVersion": "latest",
+    "wordpressPlugins": {
+        "LocalPlugin": "./"
+     }
+}
