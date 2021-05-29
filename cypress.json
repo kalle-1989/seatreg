@@ -1,6 +1,7 @@
 {
     "wp": {
         "version": ["5.5"],
+        "port": 3333,
         "themes": ["../../themes/twentytwentyone"]
     }
 }

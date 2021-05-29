@@ -25,7 +25,8 @@
     "registration-scripts": "gulp registration-scripts",
     "registration-styles": "gulp registration-styles",
     "watch": "gulp watch",
-    "test:e2e": "wp-cypress start"
+    "test:e2e": "wp-cypress start",
+    "test:e2e:stop": "wp-cypress stop"
   },
   "author": "Siim Kirjanen",
   "license": "GPLv2 or later"
