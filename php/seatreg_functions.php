@@ -80,9 +80,6 @@ function seatreg_is_registration_view_page() {
 }
 
 function seatreg_validate_bookings_file_input() {
-	if(empty($_GET['zone'])) {
-		wp_die('Missing zone');
-	}
 	if(empty($_GET['code'])) {
 		wp_die('Missing code');
 	}
@@ -783,13 +780,13 @@ function seatreg_generate_booking_manager_html($active_tab, $order, $searchTerm)
 				$booking = $row->booking_id;
 				$registrationId = $row->id;
 				$time = strtotime($row->booking_date);
-				$myFormatForView = date("m-d-y", $time);
+				$myFormatForView = date("m-d-y", $row->booking_date);
 				
 				echo '<div class="reg-seat-item">';
 					echo '<div class="seat-nr-box manager-box">', esc_html($row->seat_nr), '</div>';
 					echo '<div class="seat-room-box manager-box" title="',esc_html($row->room_name),'">', esc_html($row->room_name),'</div>';
 					echo '<div class="seat-name-box manager-box" title="' . esc_html($row->first_name) . ' '. esc_html($row->last_name).'"><input type="hidden" class="f-name" value="'.esc_html($row->first_name).'"/><input type="hidden" class="l-name" value="'. esc_html($row->last_name) .'" /><span class="full-name">', esc_html($row->first_name), ' ', esc_html($row->last_name), '</span></div>';
-					echo '<div class="seat-date-box manager-box" title="',esc_html($row->booking_date),'">',esc_html($myFormatForView),'</div>';
+					echo '<div class="seat-date-box manager-box" title="', esc_html(date('M j Y h:i e', $row->booking_date)),'">',esc_html($myFormatForView),'</div>';
 					echo "<div class='booking-id-box manager-box' title='",esc_html($row->booking_id), "'>",esc_html($row->booking_id),"</div>";
 					echo '<button class="btn btn-outline-secondary btn-sm show-more-info">', esc_html__('More info','seatreg'), '</button>';
 					echo "<span class='edit-btn' data-code='", esc_attr($code),"' data-booking='", esc_attr($booking),"' data-id='", esc_attr($registrationId),"'><i class='fa fa-pencil-square-o' aria-hidden='true'></i>", esc_html__('Edit','seatreg'), "</span>";
@@ -799,7 +796,7 @@ function seatreg_generate_booking_manager_html($active_tab, $order, $searchTerm)
 					echo '</div>';
 
 					echo '<div class="more-info">';
-						echo '<div>', esc_html__('Registration date:','seatreg'), ' <span class="time-string">', esc_html($row->booking_date), '</span> (YYYY-MM-DD HH:MM:SS)</div>';
+						echo '<div>', esc_html__('Registration date:','seatreg'), ' <span class="time-string">', esc_html(date('M j Y h:i e', $row->booking_date)), '</span></div>';
 						echo '<div>', esc_html__('Email:', 'seatreg'), ' ', esc_html($row->email), '</div>';
 
 						for($i = 0; $i < $cus_length; $i++) {
@@ -827,12 +824,13 @@ function seatreg_generate_booking_manager_html($active_tab, $order, $searchTerm)
 				$booking = $row->booking_id;
 				$registrationId = $row->id;
 				$time = strtotime($row->booking_date);
-				$myFormatForView = date("m-d-y", $time);
+				$myFormatForView = date("m-d-y", $row->booking_date);
+
 				echo '<div class="reg-seat-item">';
 					echo '<div class="seat-nr-box manager-box">',esc_html( $row->seat_nr), '</div>';
 					echo '<div class="seat-room-box manager-box" title="',esc_attr($row->room_name),'">', esc_html($row->room_name),'</div>';
 					echo '<div class="seat-name-box manager-box" title="'.esc_attr($row->first_name). ' '. esc_html($row->last_name).'"><input type="hidden" class="f-name" value="'.esc_html($row->first_name).'"/><input type="hidden" class="l-name" value="'. esc_html($row->last_name) .'" /><span class="full-name">', esc_html($row->first_name), ' ', esc_html($row->last_name), '</span></div>';
-					echo '<div class="seat-date-box manager-box" title="',esc_attr($row->booking_date),'">',esc_html($myFormatForView),'</div>';
+					echo '<div class="seat-date-box manager-box" title="', esc_html(date('M j Y h:i e', $row->booking_date)),'">',esc_html($myFormatForView),'</div>';
 					echo "<div class='booking-id-box manager-box' title='",esc_attr($row->booking_id), "'>",esc_html($row->booking_id),"</div>";
 					echo '<button class="btn btn-outline-secondary btn-sm show-more-info">', esc_html__('More info','seatreg'), '</button>';
 					echo "<span class='edit-btn' data-code='", esc_attr($code),"' data-booking='", esc_attr($booking),"' data-id='", esc_attr($registrationId),"'><i class='fa fa-pencil-square-o' aria-hidden='true'></i>", esc_html__('Edit','seatreg'), "</span>";
@@ -841,8 +839,8 @@ function seatreg_generate_booking_manager_html($active_tab, $order, $searchTerm)
 					echo '</div>';
 
 					echo '<div class="more-info">';
-						echo '<div>Registration date: <span class="time-string">', esc_html( $row->booking_date ), '</span> (YYYY-MM-DD HH:MM:SS)</div>';
-						echo '<div>Approval date: <span class="time-string">', esc_html( $row->booking_confirm_date ), '</span> (YYYY-MM-DD HH:MM:SS)</div>';
+						echo '<div>', esc_html__('Registration date:','seatreg'), ' <span class="time-string">', esc_html( date('M j Y h:i e', $row->booking_date) ), '</span></div>';
+						echo '<div>', esc_html__('Approval date:', 'seatreg'), ' <span class="time-string">', esc_html( date('M j Y h:i e', $row->booking_confirm_date ) ), '</span></div>';
 						echo '<div>Email: ', esc_html( $row->email ), '</div>';
 
 						for($i = 0; $i < $cus_length; $i++) {
@@ -955,7 +953,9 @@ function seatreg_generate_tabs($targetPage) {
 			wp_die($validation->errorMessage);
 		}
 	}else {
-		$active_tab = $registrations[0]->registration_code;
+		if(count($registrations) !== 0) {
+			$active_tab = $registrations[0]->registration_code;
+		}
 	} 
 
 	?>
@@ -1040,7 +1040,7 @@ function seatreg_generate_registration_code() {
 function seatreg_get_room_seat_info($struct, $bronRegistrations, $takenRegistrations) {
 	$bronLength = count($bronRegistrations);
 	$takenLength = count($takenRegistrations);
-	$regStructure = json_decode($struct)->roomData;
+	$regStructure = ($struct !== null) ? json_decode($struct)->roomData : null;
 	$roomCount = count(is_array($regStructure) ? $regStructure : []);
 	$howManyRegSeats = 0;
 	$howManyOpenSeats = 0;
@@ -1277,63 +1277,66 @@ function seatreg_set_up_db() {
 	require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
 	global $seatreg_db_table_names;
 	global $wpdb;
-    $charset_collate = $wpdb->get_charset_collate();
+	$seatreg_db_current_version = get_option( "seatreg_db_current_version" );
 
-    $sql = "CREATE TABLE IF NOT EXISTS $seatreg_db_table_names->table_seatreg (
-      id int(11) NOT NULL AUTO_INCREMENT,
-	  registration_code varchar(40) NOT NULL,
-	  registration_name varchar(255) NOT NULL, 
-	  registration_create_timestamp timestamp DEFAULT CURRENT_TIMESTAMP,
-	  registration_layout mediumtext DEFAULT '{}',
-	  is_deleted tinyint(1) NOT NULL DEFAULT 0,
-	  PRIMARY KEY  (id),
-	  UNIQUE KEY  (registration_code)
-    ) $charset_collate;";
+    $charset_collate = $wpdb->get_charset_collate() . ' ENGINE = innoDB';
 
-	dbDelta( $sql );
-
-	$sql2 = "CREATE TABLE IF NOT EXISTS $seatreg_db_table_names->table_seatreg_options (
-      id int(11) NOT NULL AUTO_INCREMENT,
-	  registration_code varchar(40) NOT NULL,
-	  registration_start_timestamp varchar(13) DEFAULT NULL,
-	  registration_end_timestamp varchar(13) DEFAULT NULL,
-	  custom_fields text DEFAULT '[]',
-	  seats_at_once int(11) NOT NULL DEFAULT 1,
-	  gmail_required tinyint(1) DEFAULT 0,
-	  registration_open tinyint(1) NOT NULL DEFAULT 1,
-	  use_pending tinyint(1) NOT NULL DEFAULT 1,
-	  registration_password varchar(255) DEFAULT NULL,
-	  notify_new_bookings tinyint(1) NOT NULL DEFAULT 1,
-	  show_bookings tinyint(1) NOT NULL DEFAULT 0,
-	  payment_text text DEFAULT NULL,
-	  info text DEFAULT NULL,
-	  booking_email_confirm tinyint(1) NOT NULL DEFAULT 1,
-	  PRIMARY KEY  (id),
-	  FOREIGN KEY  (registration_code) REFERENCES $seatreg_db_table_names->table_seatreg(registration_code)
-    ) $charset_collate;";
-
-	dbDelta( $sql2 );
-
-	$sql3 = "CREATE TABLE IF NOT EXISTS $seatreg_db_table_names->table_seatreg_bookings (
-	    id int(11) NOT NULL AUTO_INCREMENT,
-		registration_code varchar(40) NOT NULL,
-		first_name varchar(255) NOT NULL,
-		last_name varchar(255) NOT NULL,
-		email varchar(255) NOT NULL,
-		seat_id varchar(255) NOT NULL,
-		seat_nr int(11) NOT NULL,
-		room_uuid varchar(255) NOT NULL,
-		booking_date timestamp DEFAULT CURRENT_TIMESTAMP,
-		booking_confirm_date datetime DEFAULT NULL,
-		custom_field_data text,
-		status int(2) NOT NULL DEFAULT 0,
-		booking_id varchar(40) NOT NULL,
-		conf_code char(40) NOT NULL,
-		PRIMARY KEY  (id),
-		FOREIGN KEY  (registration_code) REFERENCES $seatreg_db_table_names->table_seatreg(registration_code)  
-	) $charset_collate;";
-
-	dbDelta( $sql3 );
+	if ( SEATREG_DB_VERSION != $seatreg_db_current_version ) {
+		$sql = "CREATE TABLE $seatreg_db_table_names->table_seatreg (
+			id int(11) NOT NULL AUTO_INCREMENT,
+			registration_code varchar(40) NOT NULL,
+			registration_name varchar(255) NOT NULL,
+			registration_create_timestamp int(11) DEFAULT NULL,
+			registration_layout mediumtext,
+			is_deleted tinyint(1) NOT NULL DEFAULT 0,
+			PRIMARY KEY  (id),
+			UNIQUE KEY registration_code (registration_code)
+		  ) $charset_collate;";
+	  
+		  dbDelta( $sql );
+	  
+		$sql2 = "CREATE TABLE $seatreg_db_table_names->table_seatreg_options (
+			id int(11) NOT NULL AUTO_INCREMENT,
+			registration_code varchar(40) NOT NULL,
+			registration_start_timestamp varchar(13) DEFAULT NULL,
+			registration_end_timestamp varchar(13) DEFAULT NULL,
+			custom_fields text,
+			seats_at_once int(11) NOT NULL DEFAULT 1,
+			gmail_required tinyint(1) DEFAULT 0,
+			registration_open tinyint(1) NOT NULL DEFAULT 1,
+			use_pending tinyint(1) NOT NULL DEFAULT 1,
+			registration_password varchar(255) DEFAULT NULL,
+			notify_new_bookings tinyint(1) NOT NULL DEFAULT 1,
+			show_bookings tinyint(1) NOT NULL DEFAULT 0,
+			payment_text text,
+			info text,
+			booking_email_confirm tinyint(1) NOT NULL DEFAULT 1,
+			PRIMARY KEY  (id)
+		) $charset_collate;";
+	  
+		  dbDelta( $sql2 );
+	  
+		$sql3 = "CREATE TABLE $seatreg_db_table_names->table_seatreg_bookings (
+			id int(11) NOT NULL AUTO_INCREMENT,
+			registration_code varchar(40) NOT NULL,
+			first_name varchar(255) NOT NULL,
+			last_name varchar(255) NOT NULL,
+			email varchar(255) NOT NULL,
+			seat_id varchar(255) NOT NULL,
+			seat_nr int(11) NOT NULL,
+			room_uuid varchar(255) NOT NULL,
+			booking_date int(11) DEFAULT NULL,
+			booking_confirm_date int(11) DEFAULT NULL,
+			custom_field_data text,
+			status int(2) NOT NULL DEFAULT 0,
+			booking_id varchar(40) NOT NULL,
+			conf_code char(40) NOT NULL,
+			PRIMARY KEY  (id)
+		) $charset_collate;";
+	  
+		dbDelta( $sql3 );
+		update_option( "seatreg_db_current_version", SEATREG_DB_VERSION );
+	}
 }
 
 //return all registrations and their data
@@ -1446,12 +1449,14 @@ function seatreg_get_specific_bookings( $code, $order, $searchTerm, $bookingStat
 		$code
 	) );
 
-	$roomData = json_decode($registration->registration_layout)->roomData;
+	if($registration->registration_layout !== null) {
+		$roomData = json_decode($registration->registration_layout)->roomData;
 
-	foreach ($bookings as $booking) {
-		$booking->room_name = seatreg_get_room_name_from_layout($roomData, $booking->room_uuid);
+		foreach ($bookings as $booking) {
+			$booking->room_name = seatreg_get_room_name_from_layout($roomData, $booking->room_uuid);
+		}
 	}
-
+	
 	if($order === 'room_uuid, seat_nr') {
 		usort($bookings, "seatreg_order_bookings_by_room_name");
 	}
@@ -1551,7 +1556,8 @@ function seatreg_create_new_registration($newRegistrationName) {
     	$seatreg_db_table_names->table_seatreg,
     	array(
     		'registration_name' => $newRegistrationName,
-    		'registration_code' => $registrationCode
+    		'registration_code' => $registrationCode,
+			'registration_create_timestamp' => time()
     	),
     	'%s'
     );
@@ -1583,7 +1589,7 @@ function seatreg_confirm_or_delete_booking($action, $regCode) {
 			$seatreg_db_table_names->table_seatreg_bookings,
 			array( 
 				'status' => 2,
-				'booking_confirm_date' => current_time( 'mysql' )
+				'booking_confirm_date' => time()
 			), 
 			array('booking_id' => $action->booking_id), 
 			'%s',
@@ -1632,6 +1638,7 @@ function seatreg_get_data_for_booking_file($code, $whatToShow) {
 		$bookings = $wpdb->get_results( $wpdb->prepare(
 			"SELECT * FROM $seatreg_db_table_names->table_seatreg_bookings
 			WHERE registration_code = %s
+			AND status IN (1,2)
 			ORDER BY room_uuid, seat_nr",
 			$code
 		) );
@@ -1659,12 +1666,14 @@ function seatreg_get_data_for_booking_file($code, $whatToShow) {
 		$code
 	) );
 
-	$roomData = json_decode($registration->registration_layout)->roomData;
+	if($registration->registration_layout !== null) {
+		$roomData = json_decode($registration->registration_layout)->roomData;
 
-	foreach($bookings as $booking) {
-		$booking->room_name = seatreg_get_room_name_from_layout($roomData, $booking->room_uuid);
+		foreach($bookings as $booking) {
+			$booking->room_name = seatreg_get_room_name_from_layout($roomData, $booking->room_uuid);
+		}
 	}
-
+	
 	return $bookings;
 }
 
@@ -1775,6 +1784,18 @@ function seatreg_update() {
 		$_POST['show-registration-bookings'] = 0;  
 	}else {
 		$_POST['show-registration-bookings'] = 1;
+	}
+
+	if(!isset($_POST['email-confirm'])) {
+		$_POST['email-confirm'] = 0;  
+	}else {
+		$_POST['email-confirm'] = 1;
+	}
+
+	if(!isset($_POST['booking-notification'])) {
+		$_POST['booking-notification'] = 0;  
+	}else {
+		$_POST['booking-notification'] = 1;
 	}
 	
 	$status1 = $wpdb->update(
@@ -1931,7 +1952,7 @@ function seatreg_booking_submit_callback() {
 				
 		die();
 	}
-
+/*
 	if($_SESSION['seatreg_captcha'] !== $_POST['capv']) {
 		$r = seatreg_random_string(10);
 	    $resp->setError('Wrong captcha');
@@ -1940,6 +1961,7 @@ function seatreg_booking_submit_callback() {
 
 		die();
 	}
+*/
 
 	if( empty($_POST['FirstName']) || 
 		empty($_POST['LastName']) || 

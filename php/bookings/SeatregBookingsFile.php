@@ -7,23 +7,20 @@ require_once( SEATREG_PLUGIN_FOLDER_DIR . 'php/seatreg_functions.php' );
 class SeatregBookingsFile {
     protected $_registrationCode = null;
     protected $_showWhat = 'all';
-    protected $_UTCDateTime = null;
-    protected $_userTimezone = null;
-    protected $_userDateTimeZone = null;
-    protected $_currentDateTime = null;
     protected $_registrationInfo = null;
     protected $_registrations = null;
     protected $_registrationName = null;
     protected $_customFields = null;
+    protected $_currentTimestamp = null;
 
-    public function __construct($showPending, $showConfirmed, $timeZone, $registrationCode) {
+    public function __construct($showPending, $showConfirmed, $registrationCode) {
         $this->_registrationCode = $registrationCode;
-        $this->_userTimezone = $timeZone;
+        $this->_currentTimestamp = time();
 
         if($showPending && !$showConfirmed) {
             $this->_showWhat = 'pending';
         }
-        if($showConfirmed && !$showConfirmed) {
+        if($showConfirmed && !$showPending) {
             $this->_showWhat = 'confirmed';
         }
         
@@ -31,25 +28,10 @@ class SeatregBookingsFile {
 	}
 
     protected function setUp() {
-        $this->_UTCDateTime = new DateTimeZone("UTC");
-
-        try {
-            $this->_userDateTimeZone = new DateTimeZone($this->_userTimezone);
-        }catch(Exception $e) {
-            wp_die(
-                sprintf(
-                    esc_html('Can\'t generate PDF because of Unknown or bad timezone (%s)'),
-                    esc_html($this->_userTimezone)
-                )
-            );
-        }
-
-        $this->_currentDateTime = new DateTime(null, $this->_UTCDateTime);
-        $this->_currentDateTime->setTimezone($this->_userDateTimeZone);
         $this->_registrationInfo = seatreg_get_options($this->_registrationCode)[0];
         $this->_registrations = seatreg_get_data_for_booking_file($this->_registrationCode, $this->_showWhat);
         $this->_registrationName = esc_html($this->_registrationInfo->registration_name);
-        $this->_customFields = json_decode($this->_registrationInfo->custom_fields, true);
+        $this->_customFields = ($this->_registrationInfo->custom_fields !== null) ? json_decode($this->_registrationInfo->custom_fields, true) : [];
     }
 
     protected function customFieldsWithValues($customField, $customData) {
@@ -86,10 +68,11 @@ class SeatregBookingsFile {
         return $status === "2" ? "Approved" : "Pending";
     }
 
-    protected function getBookingDateTime($date) {
-        $dateTime = new DateTime($date, $this->_UTCDateTime);
-        $dateTime->setTimezone($this->_userDateTimeZone);
+    protected function getBookingDate($timestamp) {
+        return date('M j Y h:i e', $timestamp);
+    }
 
-        return $dateTime;
+    protected function getFileName() {
+        return date('Y-M-d', $this->_currentTimestamp);
     }
 }

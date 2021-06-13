@@ -1,4 +1,6 @@
 <?php
+require_once(SEATREG_PLUGIN_FOLDER_DIR . 'registration/php/reg_functions.php');
+require_once(SEATREG_PLUGIN_FOLDER_DIR . 'php/seatreg_strings.php');
 
 //remove queued styles from registration view page
 add_action('wp_print_styles', 'seatreg_remove_all_styles', 100);
@@ -23,7 +25,7 @@ function seatreg_remove_all_scripts() {
 add_action( 'wp_enqueue_scripts', 'seatreg_public_scripts_and_styles' );
 function seatreg_public_scripts_and_styles() {
 	if ( seatreg_is_registration_view_page() && !empty($_GET['c']) ) {
-		$manifestFileContents = file_get_contents(SEATREG_PLUGIN_FOLDER_URL . 'rev-manifest.json');
+		$manifestFileContents = file_get_contents(SEATREG_PLUGIN_FOLDER_DIR . 'rev-manifest.json');
 		$manifest = json_decode($manifestFileContents, true);
 
 		wp_enqueue_style('google-open-sans', 'https://fonts.googleapis.com/css?family=Open+Sans:400,700', array(), '1.0.0', 'all');

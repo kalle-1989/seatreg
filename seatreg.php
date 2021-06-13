@@ -1,11 +1,11 @@
 <?php
 /*
 	Plugin Name: SeatReg
-	Plugin URI: https://github.com/SiimKirjanen/seatreg_wordpress
+	Plugin URI: https://github.com/SiimKirjanen/seatreg
 	Description: Create and manage seat registrations. Design your own seat maps and manage seat bookings
 	Author: Siim Kirjanen
 	Text Domain: seatreg
-	Version: 1.0.0
+	Version: 1.0.7
 	Requires at least: 5.4.4
 	Requires PHP: 7.2.28
 	License: GPLv2 or later
@@ -14,6 +14,7 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; 
 }
+require_once( 'php/constants.php');
 
 if( is_admin() ) {
 	require( plugin_dir_path( __FILE__ ) . 'php/enqueue_admin.php' );
