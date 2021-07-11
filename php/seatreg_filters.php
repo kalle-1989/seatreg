@@ -16,7 +16,7 @@ function seatreg_hide_admin_bar_from_registration_view(){
 	return false;
 }
 
-add_filter( 'page_template', 'seatreg_page_template' );
+add_filter( 'template_include', 'seatreg_page_template' );
 function seatreg_page_template( $page_template ){
     if ( seatreg_is_registration_view_page() ) {
         $page_template = SEATREG_PLUGIN_FOLDER_DIR . '/registration/index.php';
@@ -33,7 +33,7 @@ function seatreg_custom_pages() {
 		seatreg_validate_bookings_file_input();		
 		require_once( SEATREG_PLUGIN_FOLDER_DIR . 'php/bookings/SeatregBookingsPDF.php' );
 
-		$pdf = new SeatregBookingsPDF( isset($_GET['s1']), isset($_GET['s2']), $_GET['zone'], $_GET['code'] );
+		$pdf = new SeatregBookingsPDF( isset($_GET['s1']), isset($_GET['s2']), $_GET['code'] );
 		$pdf->printPDF();
 	
 		die();
@@ -44,7 +44,7 @@ function seatreg_custom_pages() {
 		seatreg_validate_bookings_file_input();	
 		require_once( SEATREG_PLUGIN_FOLDER_DIR . 'php/bookings/SeatregBookingsXlsx.php' );
 
-		$xlsx = new SeatregBookingsXlsx( isset($_GET['s1']), isset($_GET['s2']), $_GET['zone'], $_GET['code'] );
+		$xlsx = new SeatregBookingsXlsx( isset($_GET['s1']), isset($_GET['s2']), $_GET['code'] );
 		$xlsx->printXlsx();
 
 		die();
@@ -55,7 +55,7 @@ function seatreg_custom_pages() {
 		seatreg_validate_bookings_file_input();	
 		require_once( SEATREG_PLUGIN_FOLDER_DIR . 'php/bookings/SeatregBookingsTxt.php' );
 
-		$txt = new SeatregBookingsTxt( isset($_GET['s1']), isset($_GET['s2']), $_GET['zone'], $_GET['code'] );
+		$txt = new SeatregBookingsTxt( isset($_GET['s1']), isset($_GET['s2']), $_GET['code'] );
 		$txt->printTxt();
 
 		die();

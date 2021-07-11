@@ -64,7 +64,8 @@
 					seatnumber: editInfo.seatNumber,
 					seatid: editInfo.seatId,
 					bookingid: editInfo.bookingId,
-					customfield: editInfo.customFieldData
+					customfield: editInfo.customFieldData,
+					id: editInfo.id,
 				}
 			});
 	}
@@ -495,7 +496,8 @@ $('#seatreg-booking-manager').on('click', '#edit-update-btn', function() {
 		'seatId': $('#r-id').val(),
 		'customFieldData': JSON.stringify(customFields),
 		'seatNumber': seat_number,
-		'seatRoom': seat_room
+		'seatRoom': seat_room,
+		'id': $('#r-id').val(),
 	}
 
 	var promise = seatreg_edit_booking('seatreg_edit_booking', code, editInfo);
@@ -567,7 +569,6 @@ $('#seatreg-booking-manager').on('click', '#edit-update-btn', function() {
 $('.seatreg_page_seatreg-management').on('click', '.file-type-link', function(e) {
 	e.preventDefault();
 
-	var timezone =	jstz.determine();
 	var _href = $(this).attr('href');
 
 	alertify.set({ buttonFocus: "ok" });
@@ -576,9 +577,9 @@ $('.seatreg_page_seatreg-management').on('click', '.file-type-link', function(e)
 		cancel : 'cancel'
 	} });
 
-	alertify.confirm("<div>" + 'Current timezone: ' + timezone.name() + "</div><br>" + 
-	"<div class='booking-status-check-wrap'><label>show pending bookins<input type='checkbox' id='show-pending' checked /></label></div>" +
-	"<div class='booking-status-check-wrap'><label>show approved bookings<input type='checkbox' id='show-confirmed' checked /></label></div>", function (e) {
+	alertify.confirm( 
+	"<div class='booking-status-check-wrap'><label>Show pending bookins<input type='checkbox' id='show-pending' checked /></label></div>" +
+	"<div class='booking-status-check-wrap'><label>Show approved bookings<input type='checkbox' id='show-confirmed' checked /></label></div>", function (e) {
 
 	    if (e) {
 	    	if($('#show-pending').is(':checked')) {
@@ -589,8 +590,6 @@ $('.seatreg_page_seatreg-management').on('click', '.file-type-link', function(e)
 	    		_href += '&s2';
 			}
 			
-			_href += '&zone=' + timezone.name();
-
 	    	window.open(_href,'_blank');
 	    }
 	});

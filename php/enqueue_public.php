@@ -1,4 +1,6 @@
 <?php
+require_once(SEATREG_PLUGIN_FOLDER_DIR . 'registration/php/reg_functions.php');
+require_once(SEATREG_PLUGIN_FOLDER_DIR . 'php/seatreg_strings.php');
 
 //remove queued styles from registration view page
 add_action('wp_print_styles', 'seatreg_remove_all_styles', 100);
@@ -23,7 +25,7 @@ function seatreg_remove_all_scripts() {
 add_action( 'wp_enqueue_scripts', 'seatreg_public_scripts_and_styles' );
 function seatreg_public_scripts_and_styles() {
 	if ( seatreg_is_registration_view_page() && !empty($_GET['c']) ) {
-		$manifestFileContents = file_get_contents(SEATREG_PLUGIN_FOLDER_URL . 'rev-manifest.json');
+		$manifestFileContents = file_get_contents(SEATREG_PLUGIN_FOLDER_DIR . 'rev-manifest.json');
 		$manifest = json_decode($manifestFileContents, true);
 
 		wp_enqueue_style('google-open-sans', 'https://fonts.googleapis.com/css?family=Open+Sans:400,700', array(), '1.0.0', 'all');
@@ -33,7 +35,7 @@ function seatreg_public_scripts_and_styles() {
 		wp_enqueue_script('date-format', SEATREG_PLUGIN_FOLDER_URL . 'registration/js/date.format.js' , array(), '1.0.0', true);
 		wp_enqueue_script('iscroll-zoom', SEATREG_PLUGIN_FOLDER_URL . 'registration/js/iscroll-zoom.js' , array(), '5.1.3', true);
 		wp_enqueue_script('jquery-powertip', SEATREG_PLUGIN_FOLDER_URL . 'js/jquery.powertip.js' , array(), '1.2.0', true);
-		wp_enqueue_script('seatreg-registration', SEATREG_PLUGIN_FOLDER_URL . 'registration/js/registration.js' , array('jquery', 'date-format', 'iscroll-zoom', 'jquery-powertip'), '1.0.0', true);
+		wp_enqueue_script('seatreg-registration', SEATREG_PLUGIN_FOLDER_URL . 'registration/js/registration.js' , array('jquery', 'date-format', 'iscroll-zoom', 'jquery-powertip'), '1.0.1', true);
 
 		$data = seatreg_get_options_reg($_GET['c']);
 		$seatsInfo = json_encode( seatreg_stats_for_registration_reg($data->registration_layout, $data->registration_code) );
@@ -61,6 +63,7 @@ function seatreg_public_scripts_and_styles() {
 			$inlineScript .= 'var regTime = "' . esc_js($registrationTime) . '";';
 			$inlineScript .= 'var registrations = jQuery.parseJSON(' . wp_json_encode($registrations) . ');';
 			$inlineScript .= 'var ajaxUrl = "'. admin_url('admin-ajax.php') . '";';
+			$inlineScript .= 'var emailConfirmRequired = "'. esc_js($data->booking_email_confirm) . '";';
 			$inlineScript .= '} catch(err) {';
 				$inlineScript .= "showErrorView('Data initialization failed');";
 				$inlineScript .= "console.log(err);";
