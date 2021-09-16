@@ -16,6 +16,8 @@ $seatreg_db_table_names = new stdClass();
 $seatreg_db_table_names->table_seatreg = $wpdb->prefix . "seatreg";
 $seatreg_db_table_names->table_seatreg_options = $wpdb->prefix . "seatreg_options";
 $seatreg_db_table_names->table_seatreg_bookings = $wpdb->prefix . "seatreg_bookings";
+$seatreg_db_table_names->table_seatreg_payments = $wpdb->prefix . "seatreg_payments";
+$seatreg_db_table_names->table_seatreg_payments_log = $wpdb->prefix . "seatreg_payments_log";
 
 /*
    Useful functions
@@ -24,6 +26,7 @@ $seatreg_db_table_names->table_seatreg_bookings = $wpdb->prefix . "seatreg_booki
    Database stuff
    Admin form submit stuff
    Ajax stuff
+   Paypal
  */
 
 /*
@@ -155,7 +158,7 @@ function seatreg_generate_overview_section_html($targetRoom, $active_tab) {
 					<?php
 						if($targetRoom == 'overview') {
 							echo "<div class='reg-overview-top-bron-notify'>";
-								echo esc_html($regStats['bronSeats']),' ', esc_html__('pending seats', 'seatreg'), '!';
+								echo sprintf(esc_html__('%s pending seats', 'seatreg'), $regStats['bronSeats']);
 							echo '</div>';
 						}else {
 							for($i = 0; $i < $regStats['roomCount']; $i++) {
@@ -353,7 +356,7 @@ function seatreg_generate_my_registrations_section() {
 
 	if(count($registrations)) {
 		echo '<h4 class="your-registrations-header">';
-			esc_html_e('Your registrations', 'seatreg');
+			esc_html_e('Created registrations', 'seatreg');
 		echo '</h4>';
 	}
 	echo '<div class="seatreg-registrations">';
@@ -423,7 +426,7 @@ function seatreg_generate_settings_form() {
 	 $adminEmail = get_option( 'admin_email' );
 	?>
 		<h4 class="settings-heading">
-			<?php echo esc_html($options[0]->registration_name), ' settings'; ?>
+			<?php echo sprintf( __('%s settings', 'seatreg'),  $options[0]->registration_name); ?> 
 		</h4>
 		<form action="<?php echo get_admin_url() . 'admin-post.php'  ?>" method="post" id="seatreg-settings-form" class="seatreg-settings-form" style="max-width:600px">
 
@@ -454,7 +457,7 @@ function seatreg_generate_settings_form() {
 			</div>
 
 			<div class="form-group">
-				<label for="registration-end-timestamp"><i class="fa fa-clock-o" style="color:rgb(250, 38, 38); margin-right:3px"></i><?php _e('Registration end date', 'seatreg'); ?></label>
+				<label for="registration-end-timestamp"><i class="fa fa-clock-o" style="color:rgb(250, 38, 38); margin-right:3px"></i><?php esc_html_e('Registration end date', 'seatreg'); ?></label>
 				<p class="help-block"><?php esc_html_e('Set registration end date (dd.mm.yyyy)', 'seatreg'); ?>.</p>
 				<input type="text" id="registration-end-timestamp" class="form-control option-datepicker" placeholder="(dd.mm.yyyy)" autocomplete="off" />
 				<input type='hidden' value='<?php echo esc_attr($options[0]->registration_end_timestamp); ?>' id="end-timestamp" class="datepicker-altfield" name="end-timestamp" />
@@ -474,13 +477,7 @@ function seatreg_generate_settings_form() {
 			<div class="form-group">
 				<label for="registration-info-text"><?php esc_html_e('Registration info text', 'seatreg'); ?></label>
 				<p class="help-block"><?php esc_html_e('Set registration info text. Will be displayed in registration page', 'seatreg'); ?>.</p>
-				<textarea class="form-control" id="registration-info-text" name="registration-info-text" placeholder="Enter info text here"><?php echo esc_html($options[0]->info); ?></textarea>
-			</div>
-
-			<div class="form-group">
-				<label for="payment-instructions"><?php esc_html_e('Payment instruction', 'seatreg'); ?></label>
-				<p class="help-block"><?php esc_html_e('At the moment this plugin dosn\'t offer any payment solutions, but you can leave informative text that instructs how to pay for booking. It will be displayed in booking status page', 'seatreg'); ?>.</p>
-				<textarea class="form-control" id="payment-instructions" name="payment-instructions" placeholder="Enter payment instructions here"><?php echo esc_html($options[0]->payment_text); ?></textarea>
+				<textarea class="form-control" id="registration-info-text" name="registration-info-text" placeholder="<?php esc_html_e('Enter info text here', 'seatreg'); ?>"><?php echo esc_html($options[0]->info); ?></textarea>
 			</div>
 
 			<div class="form-group">
@@ -505,7 +502,7 @@ function seatreg_generate_settings_form() {
 				<p class="help-block">
 					<?php esc_html_e('You can set a password. Only people who know it can view your registration and make a booking. Leave it empty for no password', 'seatreg'); ?>.
 				</p>
-				<input type="text" class="form-control" id="registration-password" name="registration-password" autocomplete="off" placeholder="Enter password here" value="<?php echo esc_html($options[0]->registration_password); ?>">
+				<input type="text" class="form-control" id="registration-password" name="registration-password" autocomplete="off" placeholder="<?php echo esc_html('Enter password here', 'seatreg'); ?>" value="<?php echo esc_html($options[0]->registration_password); ?>">
 			</div>
 
 			<div class="form-group">
@@ -551,6 +548,76 @@ function seatreg_generate_settings_form() {
 			      		<?php esc_html_e('Send notifications', 'seatreg'); ?>
 			    	</label>
 			  	</div>
+			</div>
+
+			<div class="form-group">
+				<label for="payment-instructions"><?php esc_html_e('Payment instruction', 'seatreg'); ?></label>
+				<p class="help-block"><?php esc_html_e('You can leave informative text that instructs how to pay for a booking. It will be displayed in booking status page', 'seatreg'); ?>.</p>
+				<textarea class="form-control" id="payment-instructions" name="payment-instructions" placeholder="<?php esc_html_e('Enter payment instructions here', 'seatreg')?>"><?php echo esc_html($options[0]->payment_text); ?></textarea>
+			</div>
+
+			<div class="form-group">
+				<label for="paypal"><?php esc_html_e('PayPal payments', 'seatreg'); ?></label>
+				<p class="help-block">
+					<?php esc_html_e('Allow and configure PayPal payments. Enables you to ask money for bookings. To enable this feature you need to create a Buy Now button in Paypal. When creating a button only fill item name. Don\'t add price, shipping etc.', 'seatreg'); ?>
+				</p>
+				<?php if(extension_loaded('curl')): ?>
+					<div class="checkbox">
+						<label>
+							<input type="checkbox" id="paypal" name="paypal-payments" value="0" <?php echo $options[0]->paypal_payments == '1' ? 'checked':'' ?> >
+							<?php esc_html_e('Allow payments', 'seatreg'); ?>
+						</label>
+					</div>
+					<div class="paypal-configuration">
+						<label for="paypal-business-email"><?php esc_html_e('PayPal business email', 'seatreg'); ?></label>
+						<p class="help-block">
+							<?php esc_html_e('Pease enter your PayPal business email', 'seatreg'); ?>.
+						</p>
+						<input type="text" class="form-control" id="paypal-business-email" name="paypal-business-email" autocomplete="off" placeholder="<?php echo esc_html('PayPal business email', 'seatreg'); ?>" value="<?php echo esc_html($options[0]->paypal_business_email); ?>"> 
+						<br>
+
+						<label for="paypal-button-id"><?php esc_html_e('PayPal button id', 'seatreg'); ?></label>
+						<p class="help-block">
+							<?php esc_html_e('Pease enter PayPal button id', 'seatreg'); ?>.
+						</p>
+						<input type="text" class="form-control" id="paypal-button-id" name="paypal-button-id" autocomplete="off" placeholder="<?php echo esc_html('PayPal button id', 'seatreg'); ?>" value="<?php echo esc_html($options[0]->paypal_button_id); ?>"> 
+						<br>
+
+						<label for="paypal-currency-code"><?php esc_html_e('PayPal currency', 'seatreg'); ?></label>
+						<p class="help-block">
+							<?php esc_html_e('Pease enter PayPal currency code (ISO 4217)', 'seatreg'); ?>.
+						</p>
+						<input type="text" class="form-control" id="paypal-currency-code" name="paypal-currency-code" autocomplete="off" maxlength="3" oninput="this.value = this.value.toUpperCase()" placeholder="<?php echo esc_html('PayPal currency code', 'seatreg'); ?>" value="<?php echo esc_html($options[0]->paypal_currency_code); ?>"> 
+						<br>
+
+						<label for="payment-mark-confirmed"><?php esc_html_e('Set paid booking approved', 'seatreg'); ?></label>
+						<p class="help-block">
+							<?php esc_html_e('Set booking approved automatically when payment has been completed', 'seatreg'); ?>.
+						</p>
+						<div class="checkbox">
+							<label>
+								<input type="checkbox" id="payment-mark-confirmed" name="payment-mark-confirmed" value="0" <?php echo $options[0]->payment_completed_set_booking_confirmed == '1' ? 'checked': ''; ?> >
+								<?php esc_html_e('Set approved', 'seatreg'); ?>
+							</label>
+						</div>
+						<br>
+
+						<label for="paypal-sandbox-mode"><?php esc_html_e('PayPal sandbox mode', 'seatreg'); ?></label>
+						<p class="help-block">
+							<?php esc_html_e('Turn on sandbox mode. Lets you test payments with your sandbox account. Don\'t forget to change business email and button id.', 'seatreg'); ?>.
+						</p>
+						<div class="checkbox">
+							<label>
+								<input type="checkbox" id="paypal-sandbox-mode" name="paypal-sandbox-mode" value="0" <?php echo $options[0]->paypal_sandbox_mode == '1' ? 'checked':'' ?> >
+								<?php esc_html_e('PayPal sandbox', 'seatreg'); ?>
+							</label>
+						</div>
+					</div>
+				<?php else: ?>
+					<div class="alert alert-primary" role="alert">
+						<?php esc_html_e('Curl extension is required for Paypal to work', 'seatreg'); ?>
+					</div>
+				<?php endif; ?>
 			</div>
 
 			<div class="form-group">
@@ -640,7 +707,7 @@ function seatreg_generate_settings_form() {
 
 			<?php
 				wp_nonce_field( 'seatreg-options-submit', 'seatreg-options-nonce' );
-				submit_button( esc_html('Save changes', 'seatreg'), 'primary', 'seatreg-settings-submit', false );
+				submit_button( esc_html__('Save changes', 'seatreg'), 'primary', 'seatreg-settings-submit', false );
 			?>
 
 		</from>
@@ -661,7 +728,7 @@ function seatreg_create_registration_from() {
 			<input type='hidden' name='action' value='seatreg_create_submit' />
 			<?php echo seatrag_generate_nonce_field('seatreg-admin-nonce'); ?>
 			<?php
-				submit_button('Create new registration');
+				submit_button(esc_html__('Create new registration', 'seatreg'));
 			?>
 	    </form>
 	<?php
@@ -674,7 +741,7 @@ function seatreg_create_delete_registration_from($registrationCode) {
 			<input type='hidden' name='action' value='seatreg_delete_registration' />
 			<?php echo seatrag_generate_nonce_field('seatreg-admin-nonce'); ?>
 			<?php
-				submit_button('Delete', 'delete-registration-btn', 'delete-registration', false, array( 'id' => "delete-$registrationCode" ));
+				submit_button(esc_html__('Delete', 'seatreg'), 'delete-registration-btn', 'delete-registration', false, array( 'id' => "delete-$registrationCode" ));
 			?>
 	    </form>
 	<?php
@@ -730,22 +797,33 @@ function seatreg_generate_booking_manager_html($active_tab, $order, $searchTerm)
 	$custom_fields = json_decode($seatregData->custom_fields, true);
 	$cus_length = count(is_array($custom_fields) ? $custom_fields : []);
 	$regId = $seatregData->id;
-	$project_name = $seatregData->registration_name;
+	$project_name_original = $seatregData->registration_name;
 	$bookings1 = seatreg_get_specific_bookings($code, $order, $searchTerm, '1');
 	$bookings2 = seatreg_get_specific_bookings($code, $order, $searchTerm, '2');
 	$row_count = count($bookings1);
 	$row_count2 = count($bookings2);
 
-	if($row_count > 0) {
-		echo "<div class='bron-count-notify'>", $row_count, esc_html__(' pending bookings!', 'seatreg'), "</div>";
-	}
+
+	?>
+		<div class='management-header'>
+			<div class='registration-name'>
+				<?php echo $project_name_original; ?>
+			</div>
+			<?php if($row_count > 0): ?>
+				<div class="pending-bookings-count">
+					<?php echo sprintf(esc_html__('%s pending bookings', 'seatreg'), $row_count); ?>
+				</div>
+			<?php endif; ?>
+
+		</div>	
+	<?php
 	
-	$project_name = str_replace(' ', '_', $project_name);
+	$project_name = str_replace(' ', '_', $project_name_original);
 
 	echo '<input type="hidden" id="seatreg-reg-code" value="', esc_attr($seatregData->registration_code), '"/>';
 	echo '<div class="input-group manager-search-wrap">';
 				echo '<input type="hidden" id="seatreg-reg-code" value="', esc_attr($seatregData->registration_code), '"/>';
-            	echo '<input type="text" class="form-control manager-search" placeholder="Search booking" maxlength="', SEATREG_REGISTRATION_SEARCH_MAX_LENGTH ,'" value="', esc_attr($searchTerm), '"/>';
+            	echo '<input type="text" class="form-control manager-search" placeholder="'.esc_html__('Search booking', 'seatreg').'" maxlength="', SEATREG_REGISTRATION_SEARCH_MAX_LENGTH ,'" value="', esc_attr($searchTerm), '"/>';
             	echo '<div class="input-group-btn">';
                 	echo '<button class="btn btn-default search-button" type="submit"><i class="fa fa-search" aria-hidden="true"></i></button>';
             	echo '</div>';
@@ -763,9 +841,9 @@ function seatreg_generate_booking_manager_html($active_tab, $order, $searchTerm)
 			echo '</ul>';
 		echo '<div class="panel-container differentBgColor">';
 				echo '<div class="registration-manager-labels">
-						<div class="seat-nr-box manager-box manager-box-link" data-order="nr">', esc_html__('SEAT','seatreg'),'</div>
-						<div class="seat-room-box manager-box manager-box-link" data-order="room">', esc_html__('ROOM','seatreg'),'</div>
-						<div class="seat-name-box manager-box manager-box-link" data-order="name">', esc_html__('NAME','seatreg'),'</div>
+						<div class="seat-nr-box manager-box manager-box-link" data-order="nr">', esc_html__('Seat','seatreg'),'</div>
+						<div class="seat-room-box manager-box manager-box-link" data-order="room">', esc_html__('Room','seatreg'),'</div>
+						<div class="seat-name-box manager-box manager-box-link" data-order="name">', esc_html__('Name','seatreg'),'</div>
 						<div class="seat-name-box manager-box manager-box-link" data-order="date">', esc_html__('Date','seatreg'),'</div>
 						<div class="seat-date-box manager-box manager-box-link" data-order="id">', esc_html__('Booking id','seatreg'),'</div>	
 					</div>';
@@ -796,12 +874,13 @@ function seatreg_generate_booking_manager_html($active_tab, $order, $searchTerm)
 					echo '</div>';
 
 					echo '<div class="more-info">';
-						echo '<div>', esc_html__('Registration date:','seatreg'), ' <span class="time-string">', esc_html(date('M j Y h:i e', $row->booking_date)), '</span></div>';
-						echo '<div>', esc_html__('Email:', 'seatreg'), ' ', esc_html($row->email), '</div>';
-
+						echo '<div>', esc_html__('Registration date','seatreg'), ': <span class="time-string">', esc_html(date('M j Y h:i e', $row->booking_date)), '</span></div>';
+						echo '<div>', esc_html__('Email', 'seatreg'), ': ', esc_html($row->email), '</div>';
+					
 						for($i = 0; $i < $cus_length; $i++) {
 							echo seatreg_customfield_with_value($custom_fields[$i], $custom_field_data);
 						}
+						echo seatreg_generate_payment_section($row);
 					echo '</div>';
 					echo '<input type="hidden" class="booking-identification" value='. esc_attr($row->booking_id) .' />';
 				echo '</div>'; 
@@ -839,14 +918,14 @@ function seatreg_generate_booking_manager_html($active_tab, $order, $searchTerm)
 					echo '</div>';
 
 					echo '<div class="more-info">';
-						echo '<div>', esc_html__('Registration date:','seatreg'), ' <span class="time-string">', esc_html( date('M j Y h:i e', $row->booking_date) ), '</span></div>';
-						echo '<div>', esc_html__('Approval date:', 'seatreg'), ' <span class="time-string">', esc_html( date('M j Y h:i e', $row->booking_confirm_date ) ), '</span></div>';
+						echo '<div>', esc_html__('Registration date','seatreg'), ': <span class="time-string">', esc_html( date('M j Y h:i e', $row->booking_date) ), '</span></div>';
+						echo '<div>', esc_html__('Approval date', 'seatreg'), ': <span class="time-string">', esc_html( date('M j Y h:i e', $row->booking_confirm_date ) ), '</span></div>';
 						echo '<div>Email: ', esc_html( $row->email ), '</div>';
 
 						for($i = 0; $i < $cus_length; $i++) {
 							echo seatreg_customfield_with_value($custom_fields[$i], $custom_field_data);
 						}
-
+						echo seatreg_generate_payment_section($row);
 					echo '</div>';
 					echo '<input type="hidden" class="booking-identification" value='. esc_attr($row->booking_id) .' />';
 				echo '</div>'; 
@@ -904,11 +983,57 @@ function seatreg_customfield_with_value($custom_field, $submitted_custom_data) {
 	}
 }
 
+function seatreg_generate_payment_logs($paymentLogs) {
+	echo '<div class="payment-log-wrap">';
+		foreach ($paymentLogs as $paymentLog) {
+			$logClassName = '';
+			
+			if($paymentLog->log_status === SEATREG_PAYMENT_LOG_ERROR) {
+				$logClassName = 'error-log';
+			}else if($paymentLog->log_status === SEATREG_PAYMENT_LOG_INFO) {
+				$logClassName = 'info-log';
+			}
+
+			?>
+				<div class="<?php echo $logClassName; ?>">
+					<?php esc_html_e($paymentLog->log_status); ?>
+				</div>
+				<div class="<?php echo $logClassName; ?>">
+					<?php esc_html_e($paymentLog->log_date); ?>
+				</div>
+				<div class="<?php echo $logClassName; ?>">
+					<?php esc_html_e($paymentLog->log_message); ?>
+				</div>
+			<?php
+		}
+	echo '</div>';
+}
+
+function seatreg_generate_payment_section($booking) {
+	if($booking->payment_status == null) {
+		echo '<br>';
+		esc_html_e('No payment info recorded. This means that this booking has no price or user has not started the payment process.', 'seatreg'); 
+
+		return;
+	}
+	echo '<br>';
+	echo '<div><strong>', sprintf(esc_html__('Payment is %s', 'seatreg'), esc_html($booking->payment_status)), '</strong></div>';
+	if($booking->payment_status === SEATREG_PAYMENT_COMPLETED || $booking->payment_status === SEATREG_PAYMENT_REVERSED || $booking->payment_status === SEATREG_PAYMENT_REFUNDED) {
+		echo '<div>', sprintf(esc_html__('Payment of %s', 'seatreg'), esc_html("$booking->payment_total_price  $booking->payment_currency")), '</div>';
+		echo '<div>', sprintf(esc_html__('Payment txn is %s', 'seatreg'), esc_html($booking->payment_txn_id)), '</div>';
+		echo '<div>', sprintf(esc_html__('Payment date is %s', 'seatreg'), esc_html($booking->payment_update_date)), '</div>';
+	}
+	echo '<br>';
+	echo '<div><strong>', esc_html__('Payment logs', 'seatreg') ,'</strong></div><br>';
+	
+	echo seatreg_generate_payment_logs(seatreg_get_payment_logs($booking->booking_id));
+}
+
 function seatreg_booking_edit_modal() {
 
 ?>
 
-<div class="modal fade" id="edit-modal" tabindex="-1" role="dialog" aria-hidden="true">
+<div class="modal fade edit-modal" id="edit-modal" tabindex="-1" role="dialog" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
@@ -917,11 +1042,26 @@ function seatreg_booking_edit_modal() {
       </div>
       <div class="modal-body">
 		<form id="booking-edit-form">
-	        <label><?php esc_html_e('Seat', 'seatreg'); ?> <input type="text" id="edit-seat" name="seat-nr"/></label> <span id="edit-seat-error"></span><br>
-	        <label><?php esc_html_e('Room', 'seatreg'); ?> <input type="text" id="edit-room" name="room"/></label> <span id="edit-room-error"></span><br>
+			<div class="edit-modal-input-wrap">
+				<label for="edit-seat"><h5><?php esc_html_e('Seat', 'seatreg'); ?></h5></label><br>
+				<input type="text" id="edit-seat" name="seat-nr"/></label> <span id="edit-seat-error"></span>
+			</div>
+			
+			<div class="edit-modal-input-wrap">
+				<label for="edit-room"><h5><?php esc_html_e('Room', 'seatreg'); ?></h5></label><br>
+				<input type="text" id="edit-room" name="room"/> <span id="edit-room-error"></span>
+			</div>
+
+			<div class="edit-modal-input-wrap">
+				<label for="edit-fname"><h5><?php esc_html_e('First name', 'seatreg'); ?></h5></label><br>
+				<input type="text" id="edit-fname" name="first-name"/> <span id="edit-fname-error"></span>
+			</div>
+
+			<div class="edit-modal-input-wrap">
+				<label for="edit-lname"><h5><?php esc_html_e('Last name', 'seatreg'); ?></h5></label><br>
+				<input type="text" id="edit-lname" name="last-name"/></label> <span id="edit-lname-error"></span>
+			</div>
 	        
-	        <label><?php esc_html_e('First Name', 'seatreg'); ?> <input type="text" id="edit-fname" name="first-name"/></label><span id="edit-fname-error"></span><br>
-			<label><?php esc_html_e('Last Name', 'seatreg'); ?> <input type="text" id="edit-lname" name="last-name"/></label><span id="edit-lname-error"></span><br>
 			<input type="hidden" id="modal-code">
 			<input type="hidden" id="booking-id">
 			<input type="hidden" id="r-id">
@@ -1006,14 +1146,14 @@ function seatreg_echo_booking($registrationCode, $bookingId) {
 
 		if(count($bookings) > 0) {
 			echo '<h4>', esc_html($registration->registration_name), '</h4>';
-			echo '<h4>Booking id: ', esc_html($bookingId),'</h4>';
+			echo '<h4>', esc_html__('Booking id', 'seatreg'), ': ' , esc_html($bookingId),'</h4>';
 
 			foreach($bookings as $booking) {
-				echo 'Name: ', esc_html($booking->first_name), ' ', esc_html($booking->last_name) , '<br>Seat: ', esc_html($booking->seat_nr), '<br>Room: ', esc_html($booking->room_name), '<br>Status: ', ($booking->status === "1") ? 'Pending' : 'Confirmed', '<br><br>';
+				echo esc_html__('Name','seatreg'), ': ' , esc_html($booking->first_name), ' ', esc_html($booking->last_name) , '<br>', esc_html__('Seat', 'seatreg'), ': ' , esc_html($booking->seat_nr), '<br>', esc_html__('Room', 'seatreg') , ': ' , esc_html($booking->room_name), '<br>', esc_html__('Booking status', 'seatreg'), ': ' , ($booking->status === "1") ? esc_html__('Pending', 'seatreg') : esc_html__('Approved', 'seatreg'), '<br><br>';
 			}
 
 			if($options && $options->payment_text) {
-				echo '<h1>', esc_html__('Payment info', 'seatreg'), '</h1>';
+				echo '<h3>', esc_html__('Payment info', 'seatreg'), '</h3>';
 				echo '<p>', esc_html($options->payment_text) ,'</p>';
 			}
 		}else {
@@ -1311,6 +1451,12 @@ function seatreg_set_up_db() {
 			payment_text text,
 			info text,
 			booking_email_confirm tinyint(1) NOT NULL DEFAULT 1,
+			paypal_payments tinyint(1) NOT NULL DEFAULT 0,
+			paypal_business_email varchar(255) DEFAULT NULL,
+			paypal_button_id varchar(255) DEFAULT NULL,
+			paypal_currency_code varchar(3) DEFAULT NULL,
+			paypal_sandbox_mode tinyint(1) NOT NULL DEFAULT 0,
+			payment_completed_set_booking_confirmed tinyint(1) NOT NULL DEFAULT 0,
 			PRIMARY KEY  (id)
 		) $charset_collate;";
 	  
@@ -1333,8 +1479,34 @@ function seatreg_set_up_db() {
 			conf_code char(40) NOT NULL,
 			PRIMARY KEY  (id)
 		) $charset_collate;";
-	  
+
 		dbDelta( $sql3 );
+
+		$sql4 = "CREATE TABLE $seatreg_db_table_names->table_seatreg_payments (
+			id int(11) NOT NULL AUTO_INCREMENT,
+			booking_id varchar(40) NOT NULL,
+			payment_start_date TIMESTAMP DEFAULT NOW(),
+			payment_update_date TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+			payment_status varchar(255) NOT NULL,
+			payment_currency varchar(3) DEFAULT NULL,
+			payment_total_price int(11) DEFAULT NULL,
+			payment_txn_id varchar(20), 
+			PRIMARY KEY  (id)
+		) $charset_collate;";
+
+		dbDelta( $sql4 );
+
+		$sql5 = "CREATE TABLE $seatreg_db_table_names->table_seatreg_payments_log (
+			id int(11) NOT NULL AUTO_INCREMENT,
+			booking_id varchar(40) NOT NULL,
+			log_date TIMESTAMP DEFAULT NOW(),
+			log_message text,
+			log_status enum('ok', 'error', 'info') NOT NULL,
+			PRIMARY KEY  (id)
+		) $charset_collate;";
+
+		dbDelta( $sql5 );
+
 		update_option( "seatreg_db_current_version", SEATREG_DB_VERSION );
 	}
 }
@@ -1358,8 +1530,11 @@ function seatreg_get_registration_data($code) {
 
 	if($code != null) {
 		$registration = $wpdb->get_results( $wpdb->prepare(
-			"SELECT * FROM $seatreg_db_table_names->table_seatreg
-			WHERE registration_code = %s",
+			"SELECT a.*, b.paypal_payments
+			FROM $seatreg_db_table_names->table_seatreg AS a
+			INNER JOIN $seatreg_db_table_names->table_seatreg_options AS b
+			ON a.registration_code = b.registration_code
+			WHERE a.registration_code = %s",
 			$code
 		) );
 	}else {
@@ -1375,7 +1550,6 @@ function seatreg_get_registration_data($code) {
 
 //return bookings(status 2 and 3) belonging to specific registration
 function seatreg_get_registration_bookings($code) {
-
 	global $wpdb;
 	global $seatreg_db_table_names;
 
@@ -1387,6 +1561,51 @@ function seatreg_get_registration_bookings($code) {
 	) );
 
 	return $bookings;
+}
+
+function seatreg_get_bookings_by_booking_id($bookingId) {
+	global $wpdb;
+	global $seatreg_db_table_names;
+
+	$bookings = $wpdb->get_results( $wpdb->prepare(
+		"SELECT * FROM $seatreg_db_table_names->table_seatreg_bookings
+		WHERE booking_id = %s
+		AND status != 0",
+		$bookingId
+	) );
+
+	return $bookings;
+}
+
+// return data related to booking
+function seatreg_get_data_related_to_booking($bookingId) {
+	global $wpdb;
+	global $seatreg_db_table_names;
+
+	$data = $wpdb->get_row( $wpdb->prepare(
+		"SELECT a.*, b.*
+		FROM $seatreg_db_table_names->table_seatreg AS a
+		INNER JOIN $seatreg_db_table_names->table_seatreg_options AS b
+		ON a.registration_code = b.registration_code
+		WHERE a.registration_code = (SELECT registration_code FROM $seatreg_db_table_names->table_seatreg_bookings WHERE booking_id = %s LIMIT 1)",
+		$bookingId
+	) );
+
+	if($data) {
+		$payment = $wpdb->get_row( $wpdb->prepare(
+			"SELECT * FROM $seatreg_db_table_names->table_seatreg_payments
+			 WHERE booking_id = %s",
+			$bookingId
+		) );
+
+		if($payment) {
+			$data->payment_status = $payment->payment_status;
+		}else {
+			$data->payment_status = null;
+		}
+	}
+
+	return $data;
 }
 
 //return uploaded images
@@ -1436,13 +1655,18 @@ function seatreg_get_specific_bookings( $code, $order, $searchTerm, $bookingStat
 	}
 
 	$bookings = $wpdb->get_results( $wpdb->prepare(
-		"SELECT * FROM $seatreg_db_table_names->table_seatreg_bookings
-		WHERE registration_code = %s
-		AND status = $bookingStatus
+		"SELECT a.*, b.payment_status, b.payment_currency, b.payment_total_price, b.payment_update_date, b.payment_txn_id, c.paypal_payments
+		FROM $seatreg_db_table_names->table_seatreg_bookings AS a
+		LEFT JOIN $seatreg_db_table_names->table_seatreg_payments AS b
+		ON a.booking_id = b.booking_id
+		INNER JOIN $seatreg_db_table_names->table_seatreg_options AS c
+		ON a.registration_code = c.registration_code
+		WHERE a.registration_code = %s
+		AND a.status = $bookingStatus
 		ORDER BY $order",
 		$code
 	));
-	
+
 	$registration = $wpdb->get_row( $wpdb->prepare(
 		"SELECT * FROM $seatreg_db_table_names->table_seatreg
 		WHERE registration_code = %s",
@@ -1637,25 +1861,34 @@ function seatreg_get_data_for_booking_file($code, $whatToShow) {
 
 	if($whatToShow == 'all') {
 		$bookings = $wpdb->get_results( $wpdb->prepare(
-			"SELECT * FROM $seatreg_db_table_names->table_seatreg_bookings
-			WHERE registration_code = %s
-			AND status IN (1,2)
+			"SELECT a.*, b.payment_status, b.payment_currency, b.payment_total_price, b.payment_txn_id
+			FROM $seatreg_db_table_names->table_seatreg_bookings AS a 
+			LEFT JOIN $seatreg_db_table_names->table_seatreg_payments AS b
+			ON a.booking_id = b.booking_id
+			WHERE a.registration_code = %s
+			AND a.status IN (1,2)
 			ORDER BY room_uuid, seat_nr",
 			$code
 		) );
 	}else if($whatToShow == 'pending') {
 		$bookings = $wpdb->get_results( $wpdb->prepare(
-			"SELECT * FROM $seatreg_db_table_names->table_seatreg_bookings
-			WHERE registration_code = %s
-			AND status = 1
+			"SELECT a.*, b.payment_status, b.payment_currency, b.payment_total_price, b.payment_txn_id
+			FROM $seatreg_db_table_names->table_seatreg_bookings AS a 
+			LEFT JOIN $seatreg_db_table_names->table_seatreg_payments AS b
+			ON a.booking_id = b.booking_id
+			WHERE a.registration_code = %s
+			AND a.status = 1
 			ORDER BY room_uuid, seat_nr",
 			$code
 		) );
 	}else {
 		$bookings = $wpdb->get_results( $wpdb->prepare(
-			"SELECT * FROM $seatreg_db_table_names->table_seatreg_bookings
-			WHERE registration_code = %s
-			AND status = 2
+			"SELECT a.*, b.payment_status, b.payment_currency, b.payment_total_price, b.payment_txn_id
+			FROM $seatreg_db_table_names->table_seatreg_bookings AS a
+			LEFT JOIN $seatreg_db_table_names->table_seatreg_payments AS b
+			ON a.booking_id = b.booking_id
+			WHERE a.registration_code = %s
+			AND a.status = 2
 			ORDER BY room_uuid, seat_nr",
 			$code
 		) );
@@ -1751,6 +1984,10 @@ function seatreg_update() {
 		wp_die('Missing registration name');
 	}
 
+	if( isset($_POST['paypal-payments']) && ($_POST['paypal-business-email'] === "" || $_POST['paypal-button-id'] === "" || $_POST['paypal-currency-code'] === "" ) ) {
+		wp_die('Missing PayPal configuration');
+	}
+
 	$registrationName = sanitize_text_field($_POST['registration-name']);
 	$registrationNameValidation = SeatregDataValidation::validateRegistrationName($registrationName);
 
@@ -1798,6 +2035,24 @@ function seatreg_update() {
 	}else {
 		$_POST['booking-notification'] = 1;
 	}
+
+	if(!isset($_POST['paypal-payments'])) {
+		$_POST['paypal-payments'] = 0;  
+	}else {
+		$_POST['paypal-payments'] = 1;
+	}
+
+	if(!isset($_POST['paypal-sandbox-mode'])) {
+		$_POST['paypal-sandbox-mode'] = 0;  
+	}else {
+		$_POST['paypal-sandbox-mode'] = 1;
+	}
+
+	if(!isset($_POST['payment-mark-confirmed'])) {
+		$_POST['payment-mark-confirmed'] = 0;  
+	}else {
+		$_POST['payment-mark-confirmed'] = 1;
+	}
 	
 	$status1 = $wpdb->update(
 		"$seatreg_db_table_names->table_seatreg_options",
@@ -1814,7 +2069,13 @@ function seatreg_update() {
 			'payment_text' => $_POST['payment-instructions'] == '' ? null : sanitize_text_field($_POST['payment-instructions']),
 			'info' => sanitize_text_field($_POST['registration-info-text']),
 			'custom_fields' => $customFileds,
-			'booking_email_confirm' => sanitize_text_field($_POST['email-confirm'])
+			'booking_email_confirm' => sanitize_text_field($_POST['email-confirm']),
+			'paypal_payments' => $_POST['paypal-payments'],
+			'paypal_business_email' => sanitize_text_field($_POST['paypal-business-email']),
+			'paypal_button_id' => sanitize_text_field($_POST['paypal-button-id']),
+			'paypal_currency_code' => sanitize_text_field(strtoupper($_POST['paypal-currency-code'])),
+			'paypal_sandbox_mode' => $_POST['paypal-sandbox-mode'],
+			'payment_completed_set_booking_confirmed' => $_POST['payment-mark-confirmed']
 		),
 		array(
 			'registration_code' => sanitize_text_field($_POST['registration_code'])
@@ -1953,16 +2214,6 @@ function seatreg_booking_submit_callback() {
 				
 		die();
 	}
-/*
-	if($_SESSION['seatreg_captcha'] !== $_POST['capv']) {
-		$r = seatreg_random_string(10);
-	    $resp->setError('Wrong captcha');
-	    $resp->setData('<img src="'. SEATREG_PLUGIN_FOLDER_URL .'registration/php/image.php?dummy='.$r.'" id="captcha-img"/>');
-		$resp->echoData();
-
-		die();
-	}
-*/
 
 	if( empty($_POST['FirstName']) || 
 		empty($_POST['LastName']) || 
@@ -2241,7 +2492,7 @@ add_action( 'wp_ajax_seatreg_remove_img', 'seatreg_remove_img_callback' );
 function seatreg_remove_img_callback() {
 	seatreg_ajax_security_check();
 
-	$resp = new JsonResponse();
+	$resp = new SeatregJsonResponse();
 
 	if(!empty($_POST['imgName']) && !empty($_POST['code'])) {
 		//check if file exists
@@ -2257,4 +2508,185 @@ function seatreg_remove_img_callback() {
 		
 		die();
 	}
+}
+
+add_action( 'wp_ajax_seatreg_send_test_email', 'seatreg_send_test_email');
+function seatreg_send_test_email() {
+	seatreg_ajax_security_check();
+
+	if(empty($_POST['email'])) {
+		exit('Missing data');
+	}
+	
+	$email = sanitize_email($_POST['email']);
+	$response = new SeatregJsonResponse();
+	$adminEmail = get_option( 'admin_email' );
+
+	$mailSent = wp_mail($email, esc_html__('Seatreg test email', 'seatreg'), esc_html__('This is a test email', 'seatreg'), array(
+		"Content-type: text/html",
+		"FROM: $adminEmail"
+	));
+
+	if(!$mailSent) {
+		$response->setError('Email sending error');
+	}
+
+	wp_send_json( $response );
+}
+
+/*
+==================================================================================================================================================================================================================
+Payment functions
+==================================================================================================================================================================================================================
+*/
+
+function seatreg_generate_paypal_paynow_form($formAction, $bookingData, $amount, $returnUrl, $cancelUrl, $notifyUrl, $bookingId) {
+	?>
+		<form method="post" action="<?php echo $formAction; ?>">
+			<input type="hidden" name="cmd" value="_xclick" />
+			<input type="hidden" name="business" value="<?php echo esc_html($bookingData->paypal_business_email); ?>" />
+			<input type="hidden" name="item_name" value="<?php echo esc_html($bookingData->registration_name) . " booking " . $bookingId; ?>" />
+			<input type="hidden" name="notify_url" value="<?php echo $notifyUrl; ?>" />
+			<input type="hidden" name="hosted_button_id" value="<?php echo esc_html($bookingData->paypal_button_id); ?>" />
+			<input type="hidden" name="amount" value="<?php echo $amount; ?>">
+			<input type="hidden" name="currency_code" value="<?php echo esc_html($bookingData->paypal_currency_code); ?>"/>
+			<input type="hidden" name="no_shipping" value="1" />
+			<input type='hidden' name="cancel_return" value="<?php echo $cancelUrl; ?>" />
+			<input type="hidden" name="return" value="<?php echo $returnUrl; ?>" />
+			<input type="hidden" name="custom" value="<?php echo $bookingId; ?>">
+			<input type="image" src="https://www.paypal.com/en_US/i/btn/btn_buynowCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!" />
+		</form>
+	<?php
+}
+
+function seatreg_get_seat_price_from_layout($seatID, $roomUUID, $roomsData) {
+	$price = 0;
+
+	foreach($roomsData as $roomData) {
+		if($roomData->room->uuid === $roomUUID) {
+			foreach($roomData->boxes as $box) {
+				if($box->id === $seatID) {
+					$price = $box->price;
+					break 2;
+				}
+			}
+		}
+	}
+
+	return $price;
+}
+
+function seatreg_get_booking_total_cost($bookingId, $registrationLayout) {
+	$bookings = seatreg_get_bookings_by_booking_id($bookingId);
+	$roomsData = json_decode($registrationLayout)->roomData;
+	$totalConst = 0;
+
+	foreach($bookings as $booking) {
+		$seatPrice = seatreg_get_seat_price_from_layout($booking->seat_id, $booking->room_uuid, $roomsData);
+		$totalConst += $seatPrice;
+	}
+
+	return $totalConst;
+}
+
+function seatreg_get_payment($bookingId) {
+	global $seatreg_db_table_names;
+	global $wpdb;
+
+	$payment = $wpdb->get_row( $wpdb->prepare(
+		"SELECT * FROM $seatreg_db_table_names->table_seatreg_payments
+		WHERE booking_id = %s",
+		$bookingId
+	) );
+
+	return $payment;
+}
+
+function seatreg_get_processed_payment($bookingId) {
+	global $seatreg_db_table_names;
+	global $wpdb;
+
+	$payment = $wpdb->get_row( $wpdb->prepare(
+		"SELECT * FROM $seatreg_db_table_names->table_seatreg_payments
+		WHERE booking_id = %s
+		AND payment_status = SEATREG_PAYMENT_COMPLETED",
+		$bookingId
+	) );
+
+	return $payment;
+}
+
+function seatreg_insert_processing_payment($bookingId) {
+	global $seatreg_db_table_names;
+	global $wpdb;
+
+	$alreadyInserted = seatreg_get_payment($bookingId);
+
+	if( !$alreadyInserted ) {
+		$wpdb->insert(
+			$seatreg_db_table_names->table_seatreg_payments,
+			array(
+				'booking_id' => $bookingId,
+				'payment_status' => SEATREG_PAYMENT_PROCESSING
+			),
+			'%s'
+		);
+		$wpdb->insert(
+			$seatreg_db_table_names->table_seatreg_payments_log,
+			array(
+				'booking_id' => $bookingId,
+				'log_message' => 'PayPal return to merchant',
+				'log_status' => 'ok'
+			),
+			'%s'
+		);
+	}
+}
+
+function seatreg_insert_update_payment($bookingId, $status, $txnId, $paymentCurrency, $paymentTotalPrice) {
+	global $seatreg_db_table_names;
+	global $wpdb;
+
+	$alreadyInserted = seatreg_get_payment($bookingId);
+
+	if( $alreadyInserted ) {
+		$wpdb->update( 
+			$seatreg_db_table_names->table_seatreg_payments,
+			array( 
+				'payment_status' => $status,
+				'payment_txn_id' => $txnId,
+				'payment_currency' => $paymentCurrency,
+				'payment_total_price' => $paymentTotalPrice
+			), 
+			array(
+				'booking_id' => $bookingId
+			),
+			'%s'
+		);
+	}else {
+		$wpdb->insert(
+			$seatreg_db_table_names->table_seatreg_payments,
+			array(
+				'booking_id' => $bookingId,
+				'payment_status' => $status,
+				'payment_txn_id' => $txnId,
+				'payment_currency' => $paymentCurrency,
+				'payment_total_price' => $paymentTotalPrice
+			),
+			'%s'
+		);
+	}
+}
+
+function seatreg_get_payment_logs($bookingId) {
+	global $seatreg_db_table_names;
+	global $wpdb;
+
+	$paymentLogs = $wpdb->get_results( $wpdb->prepare(
+		"SELECT * FROM $seatreg_db_table_names->table_seatreg_payments_log
+		WHERE booking_id = %s",
+		$bookingId
+	) );
+
+	return $paymentLogs;
 }

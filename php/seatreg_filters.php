@@ -72,6 +72,18 @@ function seatreg_custom_pages() {
 
 		die();
 	}
+
+	if( isset($_GET['seatreg']) && $_GET['seatreg'] === 'payment-return' ) {
+		include SEATREG_PLUGIN_FOLDER_DIR  . 'php/paypal_return_to_merchant.php';
+
+		die();
+	}
+
+	if( isset($_GET['seatreg']) && $_GET['seatreg'] === 'paypal-ipn' ) {
+		include SEATREG_PLUGIN_FOLDER_DIR  . 'php/paypal_ipn_receiver.php';
+
+		die();
+	}
 }
 
 add_filter( 'admin_body_class', 'seatreg_admin_body_class' );
@@ -90,4 +102,13 @@ function seatreg_admin_body_class($classes) {
 add_filter('admin_footer_text', 'seatreg_remove_admin_footer_text');
 function seatreg_remove_admin_footer_text() {
     echo '';
+}
+
+add_filter( 'load_textdomain_mofile', 'seatreg_load_my_own_textdomain', 10, 2 );
+function seatreg_load_my_own_textdomain( $mofile, $domain ) {
+    if ( 'seatreg' === $domain && false !== strpos( $mofile, WP_LANG_DIR . '/plugins/' ) ) {
+        $locale = apply_filters( 'plugin_locale', determine_locale(), $domain );
+        $mofile = WP_PLUGIN_DIR . '/' . dirname( plugin_basename( __FILE__ ), 2 ) . '/languages/' . $domain . '-' . strtoupper($locale) . '.mo';
+    }
+    return $mofile;
 }

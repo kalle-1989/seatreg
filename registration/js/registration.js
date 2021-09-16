@@ -71,15 +71,18 @@
 		this.status = regTime;
 		this.spotName = translator.translate('seat');
 		this.emailConfirmEnabled = emailConfirmRequired;
+		this.payPalEnabled = payPalEnabled === '1' ? true : false;
+		this.payPalCurrencyCode = this.payPalEnabled ? payPalCurrencyCode : '';
 	}
 
-	function CartItem(id,nr,room, roomUUID) {
+	function CartItem(id, nr, room, roomUUID, price) {
 		this.id = id;
 		this.nr = nr;
 		this.room = room;
 		this.roomUUID = roomUUID;
 		this.defFields = ['FirstName','LastName','Email'];
 		this.customFields = [];
+		this.price = price;
 	};
 
 	SeatReg.prototype.browserInfo = function() {
@@ -284,6 +287,10 @@
 				tooltipContent += '<div class="seatreg-tooltip-row">' + loc[i].registrantName + '</div>';
 			}
 
+			if(loc[i].hasOwnProperty('price')) {
+				box.setAttribute('data-price', loc[i].price);
+			}
+
 			if(tooltipContent) {
 				box.setAttribute('data-powertip', tooltipContent);
 			}
@@ -450,8 +457,9 @@ SeatReg.prototype.addSeatToCart = function() {
 	var seatNr = document.getElementById('selected-seat-nr').value;
 	var roomName = document.getElementById('selected-seat-room').value;
 	var roomUUID = document.getElementById('selected-room-uuid').value;
+	var price = parseInt(document.getElementById('selected-seat-price').value);
 	var scope = this;
-	this.selectedSeats.push(new CartItem(seatId, seatNr, roomName, roomUUID));
+	this.selectedSeats.push(new CartItem(seatId, seatNr, roomName, roomUUID, price));
 	
 	$('.seats-in-cart').text(this.selectedSeats.length);
 	var boxColor = $('#boxes .box[data-seat="' + seatId + '"]').css('background-color');
@@ -464,12 +472,14 @@ SeatReg.prototype.addSeatToCart = function() {
 	var delItem = $('<div class="remove-cart-item"><i class="fa fa-times-circle"></i><span style="padding-left:4px">'+ translator.translate('remove') +'</span></div>').on('click', function() {
 		var item = $(this).closest('.cart-item');
 		var removeId = item.attr('data-cart-id');
-
+		var priceToRemove = 0;
 		var arrLen = scope.selectedSeats.length;
-		for(var i = 0; i < arrLen; i++) {
 
-			if(scope.selectedSeats[i].id = removeId) {
+		for(var i = 0; i < arrLen; i++) {
+			if(scope.selectedSeats[i].id == removeId) {
+				priceToRemove = scope.selectedSeats[i].price;
 				scope.selectedSeats.splice(i, 1);
+
 				break;
 			}
 		}
@@ -480,6 +490,7 @@ SeatReg.prototype.addSeatToCart = function() {
 			$('#seat-cart-info').html('<h3>'+ translator.translate('selectionIsEmpty') +'</h3><p>' + translator.translate('youCanAdd_') + scope.spotName + translator.translate('_toCartClickTab') + '</p>');
 			$('#checkout').css('display','none');
 			$('#seat-cart-rows').css('display','none');
+			$('#booking-total-price').empty();
 		}else {
 			var selected = scope.selectedSeats.length;
 			var infoText;
@@ -489,14 +500,22 @@ SeatReg.prototype.addSeatToCart = function() {
 				infoText = selected + translator.translate('_seatSelected');
 			}
 			$('#seat-cart-info').text(infoText);
-		
+			var totalPrice = scope.selectedSeats.reduce(function(accumulator, currentValue) {
+				return currentValue.price + accumulator;
+			}, 0);
+			$('#booking-total-price').text( translator.translate('bookingTotalCostIs_') + totalPrice + ' ' + scope.payPalCurrencyCode );
 		}
 		$('.seats-in-cart').text(scope.selectedSeats.length);
-
 	});
 
 	cartItem.append(seatNumberDiv, roomNameDiv, delItem);
 	$('#seat-cart-items').append(cartItem);
+	
+	var totalPrice = scope.selectedSeats.reduce(function(accumulator, currentValue) {
+		return currentValue.price + accumulator;
+	}, 0);
+
+	$('#booking-total-price').text( translator.translate('bookingTotalCostIs_') + totalPrice + ' ' + scope.payPalCurrencyCode );
 
 	this.closeSeatDialog();
 };
@@ -690,8 +709,7 @@ SeatReg.prototype.paintSeatDialog = function(clickBox) {
 	var room = this.rooms[this.currentRoom].room.name;
 	var showDialog = false;
 	var isSelected = false;
-
-	var jClickBox = $(clickBox);
+	var price = 0;
 
 	if(clickBox.hasAttribute('data-powertip')) {
 		$('#confirm-dialog-mob-hover').css('display','block');
@@ -722,6 +740,11 @@ SeatReg.prototype.paintSeatDialog = function(clickBox) {
 	if(clickBox.hasAttribute("data-selectedBox")) {
 		isSelected = true;
 	}
+
+	if(clickBox.hasAttribute("data-price")) {
+		price = clickBox.getAttribute('data-price');
+		$('#selected-seat-price').val(price);
+	}
 	
 	if(hover != null) {
 		$('#confirm-dialog-mob-hover').html(hover);
@@ -732,7 +755,11 @@ SeatReg.prototype.paintSeatDialog = function(clickBox) {
 			if(type == 'rbox' && this.selectedSeats.length < this.seatLimit ) {
 
 				if(this.status == 'run') {
-					$('#confirm-dialog-mob-text').html('<div class="add-seat-text"><h5>'+ translator.translate('add_') + ' ' + this.spotName + ' ' + nr + translator.translate('_fromRoom_') + ' ' + room + translator.translate('_toSelection') +'</h5>' + '</div>');
+					$('#confirm-dialog-mob-text').html('<div class="add-seat-text"><h5>'+ translator.translate('add_') + ' ' + this.spotName + ' ' + nr + translator.translate('_fromRoom_') + ' ' + room + translator.translate('_toSelection') +'</h5><p>'+ translator.translate('maxSeatsToAdd') + ' ' + this.seatLimit +'</p>' + '</div>');
+
+					if(this.payPalEnabled  && this.payPalCurrencyCode && price > 0) {
+						$('#confirm-dialog-mob-text .add-seat-text').append('<p>' + translator.translate('seatCosts_') + '<strong>' + price + ' ' + this.payPalCurrencyCode + '</strong></p>');
+					}
 					$('#confirm-dialog-mob-ok').css('display','inline-block');
 				}else {
 					$('#confirm-dialog-mob-text').html('<div class="add-seat-text"><h5>' + this.spotName + ' ' + nr + translator.translate('_fromRoom_')  + room + '</h5></div>');

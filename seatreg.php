@@ -4,8 +4,10 @@
 	Plugin URI: https://github.com/SiimKirjanen/seatreg
 	Description: Create and manage seat registrations. Design your own seat maps and manage seat bookings
 	Author: Siim Kirjanen
+	Author URI: https://github.com/SiimKirjanen
 	Text Domain: seatreg
-	Version: 1.1.0
+	Domain Path: /languages
+	Version: 1.4.0
 	Requires at least: 5.3
 	Requires PHP: 7.2.28
 	License: GPLv2 or later

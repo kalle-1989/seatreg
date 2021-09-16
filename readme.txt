@@ -3,8 +3,8 @@ Donate link: https://www.paypal.com/donate?hosted_button_id=9QSGHYKHL6NMU&source
 Tags: seat registration, booking, booking seats, booking events, seat map, booking management, registration
 Requires at least: 5.3
 Requires PHP: 7.2.28
-Tested up to: 5.7
-Stable tag: 1.1.0
+Tested up to: 5.8.1
+Stable tag: 1.4.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
  
@@ -17,13 +17,14 @@ Create and manage seat registrations. Design your own seat maps and manage seat 
 
 SeatReg is a free plugin that offers the following and more to build and manage your online seat registrations.
  
-* Map builder tool helps you design and later modify your seat map. Create, delete, resize, move around and change color of your seats. You can also add custom legends and hover text to your seats.
+* Map builder tool helps you design your seat maps. Create, delete, resize, move around and change color of your seats. You can also add price, custom legends and hover text to your seats.
 * Each registration can have as many seats and rooms you wish.
-* With manager you keep an eye on your bookings. You can view, search, remove, confirm, download (PDF, XLSX, text) and change them. 
-* Get an overview of your registrations. See how many open, corfirmed or pending bookings you have.
+* With manager you keep an eye on your bookings. You can view, search, remove, confirm, change and download (PDF, XLSX, text) them. 
+* Get an overview of your registrations. See how many open, approved or pending bookings you have.
 * Many settings to control the booking flow. For example you can create custom fields that allow customers to enter extra data.
-* Scrollable and resizable registration view.
-
+* Scrollable and resizable registration view that can be provided to people via direct link or by inserting it to your website pages via shortcode (example of shortcode: [seatreg code=d0ca254995]).
+* Paypal payments support.
+  
 == Installation ==
  
 1. Install SeatReg either via the WordPress.org plugin directory, or by uploading the files to your server.
@@ -34,8 +35,24 @@ SeatReg is a free plugin that offers the following and more to build and manage 
 1. Map builder
 2. Registration view
 3. Booking manager
+4. Custom fields
 
 == Changelog ==
+
+= 1.4.0 =
+* Added tools submenu page with email testing
+* Minor UI improvements
+
+= 1.3.0 =
+* Added support for PayPal payments
+* With map builder you can now add prices to seats
+* In settings you can turn on and configure PayPal
+
+= 1.2.0 =
+* Added pot file for translations
+* Added Estonian translations
+* Text fixes and changes
+* Fixed bug when trying to remove image from room
 
 = 1.1.0 =
 * Added shortcode
