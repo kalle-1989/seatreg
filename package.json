@@ -13,7 +13,7 @@
     "gulp-uglify": "~1.1.0"
   },
   "devDependencies": {
-    "@bigbite/wp-cypress": "^0.8.1",
+    "@bigbite/wp-cypress": "^0.9.2",
     "cypress": "^7.4.0",
     "del": "^6.0.0",
     "gulp": "^4.0.2",
