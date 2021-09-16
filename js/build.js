@@ -75,7 +75,7 @@
 	*/
 
 	//box class 12 construct
-	function Box(legend, xPos, yPos, xSize, ySize, id, color, hoverText, canIRegister, seat, status, zIndex) {
+	function Box(legend, xPos, yPos, xSize, ySize, id, color, hoverText, canIRegister, seat, status, zIndex, price = 0) {
 		this.legend = legend;
 		this.xPosition = xPos;
 		this.yPosition = yPos;
@@ -88,6 +88,7 @@
 		this.seat = seat;
 		this.status = status;
 		this.zIndex = zIndex;
+		this.price = price;
 	}
 
 	//Change box values. position and size
@@ -132,6 +133,11 @@
 			this.legend = "custom";
 		}
 	}
+
+	Box.prototype.changePrice = function(price) {
+		this.price = price;
+	}
+
 	/*
 
 		*-------Legend class and methods----------
@@ -196,7 +202,7 @@
 			width: this.roomWidth + 10,
 			height: this.roomHeight + 10,
 			seatCounter: this.roomSeatCounter,
-			backgroundImage: this.backgroundImage
+			backgroundImage: this.backgroundImage,
 		}
 
 		roomData['boxes'] = [];
@@ -221,7 +227,8 @@
 				canRegister: canReg,
 				seat: this.boxes[i].seat,
 				status: 'noStatus',
-				zIndex: this.boxes[i].zIndex
+				zIndex: this.boxes[i].zIndex,
+				price: this.boxes[i].price
 			});
 		}
 
@@ -255,11 +262,11 @@
 	};
 
 	//add box to room from server data
-	Room.prototype.addBoxS = function(title,posX,posY,sizeX,sizeY,id,color,hoverText,canIRegister,status,boxZIndex) {
+	Room.prototype.addBoxS = function(title,posX,posY,sizeX,sizeY,id,color,hoverText,canIRegister,status,boxZIndex, price) {
 		if(canIRegister) {
 			this.roomSeatCounter++;
 		}
-		this.boxes.push(new Box(title,posX,posY,sizeX,sizeY,id,color,hoverText,canIRegister,this.roomSeatCounter,status,boxZIndex));
+		this.boxes.push(new Box(title,posX,posY,sizeX,sizeY,id,color,hoverText,canIRegister,this.roomSeatCounter,status,boxZIndex, price));
 		this.boxCounter++;
 	};
 
@@ -442,6 +449,7 @@
 		this.needToChangeStructure = false;
 		this.needToSave = false;  //if user makes changes this will be true. when saved this will be false
 		this.roomNameChange = {};  //if room name got changed. store old and new here
+		this.settings = {};
 	}
 
 	Registration.prototype.clearRegistrationData = function() {
@@ -502,8 +510,8 @@
 			window.seatreg.uploadedImages.forEach(function(uploaded) {
 				var $imgWrap = $("<div class='uploaded-image-box'></div");
 				$imgWrap.append("<img src='" + window.WP_Seatreg.plugin_dir_url + "uploads/room_images/" + window.seatreg.selectedRegistration + "/" + uploaded.file + "' class='uploaded-image' />");
-				$imgWrap.append("<span class='add-img-room' data-img='"+ uploaded.file +"' data-size='" + uploaded.size[0] + "," + uploaded.size[1] + "'><span class='glyphicon glyphicon-ok' aria-hidden='true'></span> Add to room background</span>");
-				$imgWrap.append("<span class='up-img-rem' data-img='"+ uploaded.file +"'><span class='glyphicon glyphicon-remove' aria-hidden='true'></span> Remove</span>");
+				$imgWrap.append("<span class='add-img-room' data-img='"+ uploaded.file +"' data-size='" + uploaded.size[0] + "," + uploaded.size[1] + "'><span class='glyphicon glyphicon-ok' aria-hidden='true'></span>"+ translator.translate('addToRoomBackground') +"</span>");
+				$imgWrap.append("<span class='up-img-rem' data-img='"+ uploaded.file +"'><span class='glyphicon glyphicon-remove' aria-hidden='true'></span> "+ translator.translate('remove') +"</span>");
 
 				$('#uploaded-images').append($imgWrap);
 			});
@@ -784,12 +792,11 @@
 			alertify.set({ 
 				labels: {
 			    	ok     : translator.translate('ok'),
-			    	cancel: translator.translate('cancel')
 				},
 				buttonFocus: "ok"  
 			});
 			var hoverGuide = '<div><div class="guide-block">'+ translator.translate('toSelectOneBox_') +'<div class="guide-item guide-item-mouse"></div></div><br><div class="guide-block"> '+ translator.translate('toSelectMultiBox_') +' <div class="guide-item guide-item-lasso"></div></div>';
-			alertify.alert('<span class="bold-text">' + translator.translate('selectBoxesToAddHover') + hoverGuide);
+			alertify.alert(translator.translate('selectBoxesToAddHover') + hoverGuide);
 
 			return;
 		}
@@ -848,7 +855,7 @@
 			'data-room-location': regScope.roomLocator
 		}).text(regScope.rooms[regScope.roomLocator].title).on('click', function() {
 			var loadingImg = $('<img>', {
-				"src": window.WP_Seatreg.plugin_dir_url + "css/loading.png",
+				"src": window.WP_Seatreg.plugin_dir_url + "img/loading.png",
 				"id": "loading-img"
 			});
 
@@ -1867,36 +1874,6 @@
 		return data;
 	};
 
-	//get data from server
-	Registration.prototype.getData = function() {
-		var thisScope = this;
-
-		$.ajax({
-			type:'POST',
-			url:'php/receiver.php',
-			//contentType: "application/json; charset=utf-8",
-			data: 'getdata=getData',
-			success: function(data) {
-				var is_JSON = true;
-
-				try {
-					var response = $.parseJSON(data);
-				} catch(err) {
-					is_JSON = false;
-				}
-				if(is_JSON) {
-					if(response.type == 'ok'){
-						thisScope.syncData($.parseJSON(response.data));
-					}else if(response.type == 'error') {
-						$('#server-response').text(response.text);
-					}
-				} else {
-					alert(data);
-				}
-			}
-		});
-	};
-
 	//overrite existing registration data on server
 	Registration.prototype.updateData = function() {
 		var dataToSend = JSON.stringify(this.collectData());
@@ -1928,7 +1905,7 @@
 					registration_code: window.seatreg.selectedRegistration
 				},
 			success: function(data) {
-				$('#update-data').find('.glyphicon').css({'display':'inline'}).end().find('.fa').css({'display': 'none'}).end().find('.save-text').text(translator.translate('save'));
+				$('#update-data').find('.save-text').text(translator.translate('save'));
 				if(data._response.type == 'ok') {
 					scope.needToSave = false;
 
@@ -1992,6 +1969,7 @@
 			$('#room-name-dialog').modal("toggle");
 			this.setBuilderHeight();
 		}else {
+			this.settings =  window.seatreg.settings;
 			var roomData = responseObj.roomData;
 			this.regBoxCounter = responseObj.global.boxCounter;
 			var globalLegendsLength = responseObj.global.legends.length;
@@ -2052,7 +2030,8 @@
 							arr[i].hoverText.replace(/\^/g,'<br>'), 
 							canReg, 
 							arr[i].status, 
-							arr[i].zIndex
+							arr[i].zIndex,
+							arr[i].price,
 						);
 			    	}
 			    }
@@ -2242,7 +2221,7 @@
 	});
 
 	$('#color-dialog').on('show.bs.modal', function() {
-		$('#color-dialog .color-dialog-info').html(reg.activeBoxesInfo());
+		$('#color-dialog .color-dialog-info').html('<h5>' + reg.activeBoxesInfo() + '</h5>');
 	});
 
 	$('#room-name-dialog').on('show.bs.modal', function() {
@@ -2262,11 +2241,81 @@
 		$('#margin-y').val(reg.rooms[reg.currentRoom].skeleton.marginY);
 	});
 
+	$('#price-dialog').on('show.bs.modal', function() {
+		var $pricingWrap = $('#selected-seats-for-pricing');
+		var currentRoom = reg.rooms[reg.currentRoom];
+		var selectedBoxes = reg.activeBoxArray.map(function(selectedBoxId) {
+			var boxLocation = currentRoom.findBox(selectedBoxId);
+			
+			return currentRoom.boxes[boxLocation];
+		});
+		var hasSeatSelected = selectedBoxes.some(function(box) {
+			return box.canRegister === true;
+		});
+
+		$pricingWrap.empty();
+		$('#set-prices').removeClass('d-none');
+
+		if(reg.settings.paypal_payments === '1') {
+			$('#enable-paypal-alert').css('display', 'none');
+		}
+		if(!hasSeatSelected) {
+			$('.set-price-wrap').addClass('d-none');
+			$('#set-prices').addClass('d-none');
+			$pricingWrap.append(
+				'<div class="alert alert-primary">'+ translator.translate('noSeatsSelected') +'</div>'
+			);
+		}else if(selectedBoxes.length == 1) {
+			$('.set-price-wrap').addClass('d-none');
+		}else {
+			$('.set-price-wrap').removeClass('d-none');
+		}
+		
+		selectedBoxes.forEach(function(box) {
+			if(box.canRegister) {
+				var boxLocation = currentRoom.findBox(box.id);
+
+				$pricingWrap.append(
+					'<div class="price-item" data-box-location="' + boxLocation + '">' + 
+						'<div class="price-item-seat">'  + box.seat  + '</div>' +
+						'<input type="number" min="0" oninput="this.value = Math.abs(this.value)" value="' + box.price + '" />' + 
+					'</div>'
+				);
+			}
+		});
+	});
+
+	$("#fill-price-for-all-selected").on('click', function() {
+		var priceForAllSelected = $('#price-for-all-selected').val();
+
+		$("#selected-seats-for-pricing .price-item").each(function() {
+			$(this).find('input').val(priceForAllSelected);
+		});
+	});
+
+	$('#set-prices').on('click', function() {
+		var currentRoom = reg.rooms[reg.currentRoom];
+
+		$('#selected-seats-for-pricing .price-item').each(function() {
+			var $this = $(this);
+			var boxLocation = $this.data('box-location');
+			var price = parseInt($this.find('input').val());
+			var box = currentRoom.boxes[boxLocation];
+
+			box.changePrice(price);
+			reg.needToSave = true;
+		});
+		$('#price-dialog').modal('hide');
+		if(reg.activeBoxArray.length) {
+			alertify.success(translator.translate('pricesAdded'));
+		}
+	});
+
     $('#legend-dialog').dialog({
     	autoOpen: false,
     	width: 500,
     	//modal: true,
-    	position: {my:"top", at:"bottom", of: $('.room-title')},
+    	position: {my:"center", at:"center", of: window},
     	buttons: [ { text: "Close", class: 'btn btn-default', tabIndex: -1, click: function() { $( this ).dialog( "close" ); } } ],
     	closeOnEscape: true,
     	show: {
@@ -2313,7 +2362,7 @@
     $('#picker').colpick({
 		flat:true,
 		layout:'hex',
-		color:'#cccccc',
+		color:'0072CE',
 
 		onSubmit: function(hsb,hex,rgb,el,bySetColor) {
 			reg.changeBoxColor(hex);
@@ -2326,7 +2375,7 @@
 	$('#picker2').colpick({
 		flat:true,
 		layout:'hex',
-		color:'#61B329',
+		color:'61B329',
 		submit:false,
 		onChange: function(hsb,hex,rgb,el,bySetColor) {
 			$('#dummy-legend .legend-box').css("background-color",'#' + hex);
@@ -2748,7 +2797,7 @@
 
 	$('#update-data').on('click', function() {
 		$(this).prop('disabled', true);
-		$('#update-data').find('.glyphicon').css({'display':'none'}).end().find('.fa').css({'display': 'inline'}).end().find('.save-text').text(translator.translate('saving'));
+		$('#update-data').find('.save-text').text(translator.translate('saving'));
 		
 		if(reg.sendValidation()) {
 			reg.rooms[reg.currentRoom].correctRoomBoxesIndex();
@@ -2800,11 +2849,10 @@
 			alertify.set({ 
 				labels: {
 			    	ok     : translator.translate('ok'),
-			    	cancel: translator.translate('cancel')
 				},
 				buttonFocus: "ok"  
 			});
-			alertify.alert(palleteGuide);
+			alertify.alert(translator.translate('selectBoxesToAddColor') + palleteGuide);
 		}
 	});
 
@@ -2902,8 +2950,8 @@
 
     		alertify.set({ 
 				labels: {
-			    	ok     : translator.translate('ok'),
-			    	cancel: translator.translate('cancel')
+			    	ok     : translator.translate('yes'),
+			    	cancel: translator.translate('no')
 				},
 				buttonFocus: "cancel"  
 			});
@@ -2980,7 +3028,7 @@
 
 					if(reg.rooms[reg.currentRoom].backgroundImage === imgName) {
 						reg.removeCurrentRoomImage();
-						$('#activ-room-img-wrap').empty().text('Room doe/s not have background image');
+						$('#activ-room-img-wrap').empty().text(translator.translate('noBgImageInRoom'));
 					}
 					
 				}else if(response.type == 'error') {
@@ -2995,7 +3043,7 @@
 
 		var curImgWrap = $('<div class="cur-img-wrap"></div>');
 		var bgImg = $('<img class="uploaded-image" src="' + window.WP_Seatreg.plugin_dir_url + 'uploads/room_images/' + seatreg.selectedRegistration + '/' + reg.rooms[reg.currentRoom].backgroundImage + '" />');
-		var remImg = $('<span id="rem-room-img"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Remove from room</span>');
+		var remImg = $('<span id="rem-room-img"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span> '+ translator.translate('removeFromRoom') +'</span>');
 
 		curImgWrap.append(bgImg, remImg);
 
@@ -3008,12 +3056,12 @@
 		if(reg.rooms[reg.currentRoom].backgroundImage !== null) {
 			var curImgWrap = $('<div class="cur-img-wrap"></div>');
 			var bgImg = $('<img class="uploaded-image" src="'+ window.WP_Seatreg.plugin_dir_url +'uploads/room_images/' + seatreg.selectedRegistration + '/' + reg.rooms[reg.currentRoom].backgroundImage + '" />');
-			var remImg = $('<span id="rem-room-img"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Remove from room</span>');
+			var remImg = $('<span id="rem-room-img"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span> '+ translator.translate('removeFromRoom') +'</span>');
 
 			curImgWrap.append(bgImg, remImg);
 			$('#activ-room-img-wrap').append(curImgWrap);
 		}else {
-			$('#activ-room-img-wrap').html('Current room doe\'s not have background image');
+			$('#activ-room-img-wrap').html(translator.translate('noBgImageInRoom'));
 		}
 	});
 
@@ -3021,7 +3069,7 @@
 		reg.removeCurrentRoomImage();
 		$('.room-image').remove();
 		$(this).closest('.cur-img-wrap').remove();
-		$('#activ-room-img-wrap').html('Current room doe\'s not have background image');
+		$('#activ-room-img-wrap').html(translator.translate('noBgImageInRoom'));
 	});
 	
 	$('#file-sub').on('click', function(e) {
@@ -3031,11 +3079,11 @@
 
 		if(picName == '') {
 			e.preventDefault();
-			$('#img-upload-resp').html('<div class="alert alert-danger" role="alert">Choose a picture to upload</div>');
+			$('#img-upload-resp').html('<div class="alert alert-danger" role="alert">'+ translator.translate('choosePictureToUpload') +'</div>');
 		}else {
 			if(!re.test(picName)) {
 				e.preventDefault();
-				$('#img-upload-resp').html('<div class="alert alert-danger" role="alert">Image name contains illegal characters</div>');
+				$('#img-upload-resp').html('<div class="alert alert-danger" role="alert">'+ translator.translate('imageNameIllegalChar') +'</div>');
 			}
 		}
 	});

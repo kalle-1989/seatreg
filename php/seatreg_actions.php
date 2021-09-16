@@ -46,3 +46,8 @@ function seatreg_update_db_check() {
         seatreg_set_up_db();
     }
 }
+
+add_action('init', 'seatreg_init');
+function seatreg_init() {
+	load_plugin_textdomain( 'seatreg', false,  dirname( plugin_basename( __FILE__ ), 2) . '/languages/');
+} 

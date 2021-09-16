@@ -8,7 +8,6 @@ function seatreg_generate_registration_strings() {
 	$translations = new stdClass();
 	$translations->illegalCharactersDetec = esc_html__('Illegal characters detected', 'seatreg');
 	$translations->emailNotCorrect = esc_html__('Email address is not correct', 'seatreg');
-	$translations->wrongCaptcha = esc_html__('Wrong code!', 'seatreg');
 	$translations->somethingWentWrong = esc_html__('Something went wrong. Please try again', 'seatreg');
 	$translations->selectionIsEmpty = esc_html__('Seat selection is empty', 'seatreg');
     $translations->youCanAdd_ = esc_html__('You can add ', 'seatreg');
@@ -24,15 +23,14 @@ function seatreg_generate_registration_strings() {
 	$translations->_isPendingState = esc_html__(' is in pending state', 'seatreg');
 	$translations->regOwnerNotConfirmed = esc_html__('(registration admin has not confirmed it)', 'seatreg');
 	$translations->selectionIsFull = esc_html__('Booking is full', 'seatreg');
-	$translations->_isAlreadyInCart = esc_html__(' is already in cart!', 'seatreg');
     $translations->_isAlreadySelected = esc_html__(' is already selected!', 'seatreg');
 	$translations->_regUnderConstruction = esc_html__('Under construction', 'seatreg');
 	$translations->emptyField = esc_html__('Empty field', 'seatreg');
 	$translations->remove = esc_html__('Remove', 'seatreg');
 	$translations->add_ = esc_html__('Add ', 'seatreg');
 	$translations->openSeatsInRoom_ = esc_html__('Open seats in the room: ', 'seatreg');
-	$translations->pendingSeatInRoom_ = esc_html__('Pending seats in the room: ', 'seatreg');
-	$translations->confirmedSeatInRoom_ = esc_html__('Confirmed seats in the room: ', 'seatreg');
+	$translations->pendingSeatInRoom_ = esc_html__('Pending bookings in the room: ', 'seatreg');
+	$translations->confirmedSeatInRoom_ = esc_html__('Approved bookings in the room: ', 'seatreg');
 	$translations->seat = esc_html__('seat', 'seatreg');
 	$translations->firstName = esc_html__('Firstname', 'seatreg');
 	$translations->lastName = esc_html__('Lastname', 'seatreg');
@@ -46,7 +44,10 @@ function seatreg_generate_registration_strings() {
     $translations->selectingGuide = esc_html__('Select a seat you want to add to booking', 'seatreg');
     $translations->Booked = esc_html__('Booked', 'seatreg');
     $translations->Pending = esc_html__('Pending', 'seatreg');
-
+    $translations->maxSeatsToAdd = esc_html__('Total seats you can add to booking is ', 'seatreg');
+    $translations->seatCosts_ = esc_html__('Booking this seat costs ', 'seatreg');
+    $translations->bookingTotalCostIs_ = esc_html__('Booking total cost is ', 'seatreg');
+    
 	return $translations;
 }
 
@@ -58,7 +59,7 @@ function seatreg_generate_admin_strings() {
     $translations->legendColorChanged = esc_html__('Legend color changed', 'seatreg');
     $translations->buildingGridUpdated = esc_html__('Building grid updated', 'seatreg');
     $translations->roomNameChanged = esc_html__('Room name changed', 'seatreg');
-    $translations->roomNameSet = esc_html__('New Room added', 'seatreg');
+    $translations->roomNameSet = esc_html__('New room added', 'seatreg');
     $translations->roomNotExist = esc_html__('Room does not exist', 'seatreg');
     $translations->seatNotExist = esc_html__('Seat dose not exist', 'seatreg');
     $translations->seatAlreadyBookedPending = esc_html__('Seat is already booked/pending', 'seatreg');
@@ -69,14 +70,12 @@ function seatreg_generate_admin_strings() {
     $translations->lagendNameMissing = esc_html__('Legend name missing!', 'seatreg');
     $translations->legendColorTaken = esc_html__('Legend color is taken. Choose another', 'seatreg');
     $translations->legendAddedTo = esc_html__('Legend added to', 'seatreg');
-    $translations->noPermToAddRoom = esc_html__('Dont have permissions to create room', 'seatreg');
-    $translations->noPermToDel = esc_html__('Dont have permission do delete', 'seatreg');
     $translations->oneRoomNeeded = esc_html__('You must have at least on room', 'seatreg');
     $translations->alreadyInRoom = esc_html__('Already in this room', 'seatreg');
     $translations->allRoomsNeedName = esc_html__('All rooms must have name', 'seatreg');
     $translations->illegalCharactersDetec = esc_html__('Illegal characters detected', 'seatreg');
     $translations->missingName = esc_html__('Name missing', 'seatreg');
-    $translations->cantDelRoom_ = esc_html__('You cant delete room ', 'seatreg');
+    $translations->cantDelRoom_ = esc_html__('You can\'t delete room ', 'seatreg');
     $translations->_cantDelRoomBecause = esc_html__(' because it contains pending or confirmed seats. You must remove them with manager first.', 'seatreg');
     $translations->roomNameMissing = esc_html__('Room name missing', 'seatreg');
     $translations->roomNameExists = esc_html__('Room name already exists. You must choose another', 'seatreg');
@@ -85,11 +84,9 @@ function seatreg_generate_admin_strings() {
     $translations->toSelectOneBox_ = esc_html__('To select one box use ', 'seatreg');
     $translations->toSelectMultiBox_ = esc_html__('To select multiple boxes use ', 'seatreg');
     $translations->selectBoxesToAddHover = esc_html__('Select box/boxes to add hover text', 'seatreg');
+    $translations->selectBoxesToAddColor = esc_html__('Select box/boxes to add color', 'seatreg');
     $translations->loading = esc_html__('Loading...', 'seatreg');
     $translations->selectBoxesToDelete = esc_html__('Select box/boxes you want to delete', 'seatreg');
-    $translations->onlyPremMembUpImg = esc_html__('Only premium members can upload background-image', 'seatreg');
-    $translations->fixNeededToSave = esc_html__('Fix needed to save!', 'seatreg');
-    $translations->boxLimitExceeded = esc_html__('Box limit exeeded', 'seatreg');
     $translations->colorApplied = esc_html__('Color applied', 'seatreg');
     $translations->noLegendsCreated = esc_html__('You have not made and legends yet', 'seatreg');
     $translations->_noSelectBoxToAddLegend = esc_html__(' You have not selected any box/boxes to add legends', 'seatreg');
@@ -102,12 +99,12 @@ function seatreg_generate_admin_strings() {
     $translations->enterLegendName = esc_html__('Enter legend name', 'seatreg');
     $translations->ok = esc_html__('Ok', 'seatreg');
     $translations->cancel = esc_html__('Cancel', 'seatreg');
-    $translations->unsavedChanges = esc_html__('Unsaved Changes', 'seatreg');
+    $translations->open = esc_html__('Open', 'seatreg');
     $translations->boxes = esc_html__('boxes', 'seatreg');
     $translations->box = esc_html__('box', 'seatreg');
     $translations->noBoxesSelected = esc_html__('No boxes selected', 'seatreg');
     $translations->pendingSeat = esc_html__('Pending seat', 'seatreg');
-    $translations->confirmedSeat = esc_html__('Confirmed seat', 'seatreg');
+    $translations->confirmedSeat = esc_html__('Approved seat', 'seatreg');
     $translations->save = esc_html__('Save', 'seatreg');
     $translations->saving = esc_html__('Saving...', 'seatreg');
     $translations->saved = esc_html__('Saved', 'seatreg');
@@ -121,6 +118,25 @@ function seatreg_generate_admin_strings() {
     $translations->areYouSure = esc_html__('Are you sure?', 'seatreg');
     $translations->pleaseAddAtLeastOneOption = esc_html__('Please add at least one option', 'seatreg');
     $translations->nameAlreadyUsed = esc_html__('Name already used', 'seatreg');
+    $translations->noBgImageInRoom = esc_html__('Current room does not have background image', 'seatreg');
+    $translations->removeFromRoom = esc_html__('Remove from room', 'seatreg');
+    $translations->choosePictureToUpload = esc_html__('Choose a picture to upload', 'seatreg');
+    $translations->imageNameIllegalChar = esc_html__('Image name contains illegal characters', 'seatreg');
+    $translations->addToRoomBackground = esc_html__('Add to room background', 'seatreg');
+    $translations->remove = esc_html__('Remove', 'seatreg');
+    $translations->showPendingBookings = esc_html__('Show pending bookins', 'seatreg');
+    $translations->showApprovedBookings = esc_html__('Show approved bookings', 'seatreg');
+    $translations->pleaseEnterPayPalBusinessEmail = esc_html__('Please enter PayPal business email', 'seatreg');
+    $translations->pleaseEnterPayPalButtonId = esc_html__('Please enter PayPal button id', 'seatreg');
+    $translations->pleaseEnterPayPalCurrencyCode = esc_html__('Please enter PayPal currency code', 'seatreg');
+    $translations->pricesAdded = esc_html__('Prices added', 'seatreg');
+    $translations->noSeatsSelected = esc_html__('No seats selected!', 'seatreg');
+    $translations->emailNotCorrect = esc_html__('Email address is not correct', 'seatreg');
+    $translations->checkEmailAddress = esc_html__('Check your email address', 'seatreg');
+    $translations->emailSendingFailed= esc_html__('Email sending failed', 'seatreg');
+    $translations->pealseWait= esc_html__('Please wait', 'seatreg');
+    $translations->yes = esc_html__('Yes', 'seatreg');
+    $translations->no = esc_html__('No', 'seatreg');
  
     return $translations;
 }

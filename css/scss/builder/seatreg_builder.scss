@@ -1,3 +1,7 @@
+@import 'modal/bg-image';
+@import 'modal/skeleton';
+@import 'modal/color';
+
 .seatreg-map-builder-page .seatreg-builder-popup .fa-times-circle {
 	color: red;
 	position: absolute;
@@ -105,7 +109,7 @@
 }
 .seatreg-map-builder-page .build-area .box-hover {
 	
-	background-image: url(bubble_12.png);
+	background-image: url('img/bubble.png');
 	background-repeat:no-repeat;
 	background-position:right bottom; 
 }
@@ -421,7 +425,16 @@
 	width: 41px;
 	height: 41px;
 }
-
+.seatreg-map-builder-page .build-area-side .price-option {
+	background-position: -257px -161px;
+	width: 41px;
+	height: 41px;
+}
+.seatreg-map-builder-page .build-area-side .price-option:hover {
+	background-position: -257px -217px;
+	width: 41px;
+	height: 41px;
+}
 
 
 .seatreg-map-builder-page .legend-dialog-div {
@@ -556,6 +569,12 @@
 
 }
 
+@keyframes box-got-active {
+	0% {border: 1px solid red;}
+	50% {border: 1px solid black;}
+	100% {border: 1px solid red;}
+}
+
 @-webkit-keyframes box-got-active {
 	0% {border: 1px solid red;}
 	50% {border: 1px solid black;}
@@ -573,13 +592,6 @@
 	50% {border: 1px solid black;}
 	100% {border: 1px solid red;}
 }
-
-@-keyframes box-got-active {
-	0% {border: 1px solid red;}
-	50% {border: 1px solid black;}
-	100% {border: 1px solid red;}
-}
-
 
 .seatreg-map-builder-page .drag-box {
     z-index: 1;
@@ -827,6 +839,7 @@
 	background-color: #f37936;
 	color: #fff;
 	cursor: pointer;
+	line-height: 17px;
 }
 
 .seatreg-map-builder-page #update-data:hover {
@@ -924,6 +937,10 @@
 
 .seatreg-map-builder-page .guide-item-grid {
 	background-position: -103px -268px;
+}
+
+.seatreg-map-builder-page .guide-item-price {
+	background-position: -257px -161px;
 }
 
 .seatreg-map-builder-page #build-section .build-area-wrapper[data-cursor="4"] {
@@ -1025,10 +1042,6 @@
 }
 .seatreg-map-builder-page .loading-text {
 	font-weight: bold;
-}
-.seatreg-map-builder-page .color-dialog-info {
-	text-align: center;
-	margin-bottom: 8px;
 }
 .seatreg-map-builder-page #build-section-click-controls {
 	border: 1px solid black;
@@ -1143,9 +1156,36 @@
 	margin-bottom: 10px;
 }
 
+.seatreg-map-builder-page #selected-seats-for-pricing {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+}
+.seatreg-map-builder-page .set-price-wrap {
+	text-align: center;
+	margin-bottom: 8px;
+}
+.seatreg-map-builder-page #price-for-all-selected {
+	width: 80px;
+}
 
+#selected-seats-for-pricing .price-item {
+	width: 160px;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	padding: 6px;
+	margin: 6px;
+	text-align: center;
+}
 
+#selected-seats-for-pricing .price-item-seat {
+	font-weight: 700;
+}
 
+#selected-seats-for-pricing .price-item input {
+	width: 100%;
+	box-sizing: border-box;
+}
 
 .seatreg-map-builder-page .clear-fix:before,
 .seatreg-map-builder-page .clear-fix:after {
@@ -1236,6 +1276,13 @@
 .seatreg-map-builder-page .room-name-error {
 	display: none;
 	color: red;
+}
+
+.seatreg-map-builder-page {
+	.alertify-message {
+		font-size: 14px;
+		font-weight: 700;
+	}
 }
 
 /*animate.css*/
@@ -1435,6 +1482,12 @@
 	animation: btn-to-red 1s ease 0 1 none;	
 }
 
+
+@keyframes btn-to-red {
+	0% {background-color: rgb(97, 179, 41);}
+	100% {background-color: rgb(255, 0, 0);}
+}
+
 @-webkit-keyframes btn-to-red {
 	0% {background-color: rgb(97, 179, 41);}
 	100% {background-color: rgb(255, 0, 0);}
@@ -1449,12 +1502,6 @@
 	0% {background-color: rgb(97, 179, 41);}
 	100% {background-color: rgb(255, 0, 0);}
 }
-
-@-keyframes btn-to-red {
-	0% {background-color: rgb(97, 179, 41);}
-	100% {background-color: rgb(255, 0, 0);}
-}
-
 
 .seatreg-map-builder-page .change-btn-to-green {
 	background-color: rgb(97, 179, 41);
@@ -1479,11 +1526,10 @@
 	100% {background-color: rgb(97, 179, 41);}
 }
 
-@-keyframes btn-to-green {
+@keyframes btn-to-green {
 	0% {background-color: rgb(255, 0, 0);}
 	100% {background-color: rgb(97, 179, 41);}
 }
-
 
 .seatreg-map-builder-page .vert-modal {
 	text-align: center;

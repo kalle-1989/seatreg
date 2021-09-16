@@ -4,7 +4,7 @@
 	}
 
 	if( empty($_GET['c'] )){
-		wp_die(esc_html__('Mssing parameters', 'seatreg'));
+		wp_die(esc_html__('Missing parameters', 'seatreg'));
 	}
 
 	require_once(SEATREG_PLUGIN_FOLDER_DIR . 'php/util/registration_time_status.php');
@@ -146,11 +146,6 @@
 							<div id="cart-text">
 								<div class="seats-in-cart">0</div>
 								<div><?php esc_html_e('seats selected', 'seatreg'); ?></div> 
-								<div class="max-seats">
-									(<?php 
-										echo esc_html__('max', 'seatreg') . ' ' . esc_html( $data->seats_at_once );
-									?>)
-								</div>
 							</div>
 						</div>
 
@@ -233,10 +228,10 @@
 							<?php esc_html_e('Total open seats', 'seatreg'); ?>: <span class="total-open"></span>
 						</div>
 						<div>
-							<?php esc_html_e('Total pending seats', 'seatreg'); ?>: <span class="total-bron"></span>
+							<?php esc_html_e('Total pending bookings', 'seatreg'); ?>: <span class="total-bron"></span>
 						</div>
 						<div>
-							<?php esc_html_e('Total confirmed seats', 'seatreg'); ?>: <span class="total-tak"></span>
+							<?php esc_html_e('Total approved bookings', 'seatreg'); ?>: <span class="total-tak"></span>
 						</div>
 					</div>
 				</div>
@@ -294,6 +289,7 @@
 					<input type="hidden" id="selected-seat-room">
 					<input type="hidden" id="selected-seat-nr">
 					<input type="hidden" id="selected-room-uuid">
+					<input type="hidden" id="selected-seat-price">
 				</div>
 			</div>
 
@@ -326,6 +322,10 @@
 						
 						<div id="seat-cart-items"></div>
 						
+						<?php if($data->paypal_payments === '1') : ?>
+							<div id="booking-total-price"></div>
+						<?php endif; ?>
+
 						<div id="checkout" class="seatreg-btn green-btn">
 							<?php
 								esc_html_e('Next', 'seatreg');
@@ -349,10 +349,10 @@
 					<div id="checkout-input-area"></div>
 					<button type="submit" id="checkout-confirm-btn" class="seatreg-btn green-btn">
 						<?php 
-							esc_html_e('OK', 'seatreg');
+							esc_html_e('Book', 'seatreg');
 						?>
 					</button>
-					<img src="<?php echo SEATREG_PLUGIN_FOLDER_URL; ?>registration/css/ajax_loader.gif" alt="Loading" class="ajax-load">
+					<img src="<?php echo SEATREG_PLUGIN_FOLDER_URL; ?>img/ajax_loader.gif" alt="Loading" class="ajax-load">
 					<div id="request-error"></div>
 					<?php seatrag_generate_nonce_field('seatreg-booking-submit'); ?>
 				</form>
@@ -367,18 +367,6 @@
 						<?php 
 							esc_html_e('seats selected', 'seatreg');
 						?>
-						<span class="max-seats">
-							(<?php
-								esc_html_e('Max', 'seatreg');
-							?>
-							<?php 
-								if($data->seats_at_once > 1) {
-									echo esc_html($data->seats_at_once),')<br>'; 
-								}else {
-									echo esc_html($data->seats_at_once),')<br>'; 
-								}	
-							?>
-						</span>
 					</div>
 				</div>
 				<div class="mobile-legend">
