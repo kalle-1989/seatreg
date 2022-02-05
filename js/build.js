@@ -1755,6 +1755,12 @@
 				}	
 			},
 			drag: function(event, ui) {
+				var zoom = 2;
+				var factor = (1 / zoom) -1;
+
+				ui.position.top += Math.round((ui.position.top - ui.originalPosition.top) * factor);
+				ui.position.left += Math.round((ui.position.left- ui.originalPosition.left) * factor);  
+
 				if(regScope.needMultiDrag) {
 					var currentLoc = $(this).position();
 					var prevLoc = $(this).data('prevLoc');
@@ -1854,6 +1860,13 @@
 				}
 				
 			},
+			resize: function(event, ui) {
+				var zoom = 2;
+				var factor = (1 / zoom) -1;
+
+				ui.position.top += Math.round((ui.position.top - ui.originalPosition.top) * factor);
+				ui.position.left += Math.round((ui.position.left- ui.originalPosition.left) * factor);  
+			},
 			stop: function(event, ui) {
 				var aLen = regScope.activeBoxArray.length;
 
@@ -1909,6 +1922,14 @@
 		
 		$('.build-area-wrapper').selectableScroll({
 			filter: ".drag-box",
+			create: function(event, ui) {
+				var a ;
+				console.log('hey');
+			},
+			refresh: function(event, ui) {
+				var a ;
+				console.log('hey');
+			},
 			stop: function( event, ui ) {
 				$('.build-area .ui-selected').addClass('active-box').removeClass('ui-selected');
 
@@ -1929,7 +1950,19 @@
 
 				regScope.showClickControls();
 			},
+			selecting: function(event, ui) {
+				var zoom = 2;
+				var factor = (1 / zoom) -1;
+
+				ui.position.top += Math.round((ui.position.top - ui.originalPosition.top) * factor);
+				ui.position.left += Math.round((ui.position.left- ui.originalPosition.left) * factor);  
+			},
 			start: function( event, ui ) {
+				var zoom = 2;
+				var factor = (1 / zoom) -1;
+
+				//ui.position.top += Math.round((ui.position.top - ui.originalPosition.top) * factor);
+				//ui.position.left += Math.round((ui.position.left- ui.originalPosition.left) * factor);  
 				regScope.activeBoxArray.length = 0;
 				$('.build-area .drag-box').removeClass('active-box');
 			},
