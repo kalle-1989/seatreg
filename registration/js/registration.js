@@ -73,6 +73,7 @@
 		this.emailConfirmEnabled = emailConfirmRequired;
 		this.payPalEnabled = payPalEnabled === '1' ? true : false;
 		this.payPalCurrencyCode = this.payPalEnabled ? payPalCurrencyCode : '';
+		this.enteredSeatPasswords = {};
 	}
 
 	function CartItem(id, nr, room, roomUUID, price) {
@@ -315,6 +316,14 @@
 
 			if(loc[i].hasOwnProperty('price')) {
 				box.setAttribute('data-price', loc[i].price);
+			}
+
+			if(loc[i].hasOwnProperty('lock')) {
+				box.setAttribute('data-lock', loc[i].lock);
+			}
+
+			if(loc[i].hasOwnProperty('password')) {
+				box.setAttribute('data-password', loc[i].password);
 			}
 
 			if(tooltipContent) {
@@ -713,9 +722,7 @@ SeatReg.prototype.openSeatDialog = function(clickBox) {
 	if(openDialog) {
 		$('#modal-bg').css('display','block');
 		$('#confirm-dialog-mob').css('display','block');
-		$('#confirm-dialog-mob-inner').removeClass('zoomOut').addClass('zoomIn');  //bounceInRight
-	}else {
-		//console.log('dont open');
+		$('#confirm-dialog-mob-inner').removeClass('zoomOut').addClass('zoomIn');
 	}
 };
 
@@ -732,6 +739,9 @@ SeatReg.prototype.paintSeatDialog = function(clickBox) {
 	var hover = null;
 	var legend = null;
 	var nr = clickBox.getAttribute('data-seat-nr');
+	var seatId = clickBox.getAttribute('data-seat'); 
+	var isLocked = clickBox.getAttribute('data-lock') === "true";
+	var passwordNeeded = clickBox.getAttribute('data-password') === "true";
 	var type = 'box';
 	var currentRoom = this.rooms[this.currentRoom].room;
 	var room = this.rooms[this.currentRoom].room.name;
@@ -779,7 +789,17 @@ SeatReg.prototype.paintSeatDialog = function(clickBox) {
 
 	if(type != 'box') {
 		if(!isSelected) {
-			if(type == 'rbox' && this.selectedSeats.length < this.seatLimit ) {
+			if(isLocked) {
+				$('#confirm-dialog-mob-ok').css('display','none');
+				$('#confirm-dialog-mob-text').html('<div class="seat-taken-notify">'+ translator.translate('seatIsLocked') +'</div>');
+			}else if(passwordNeeded && !this.enteredSeatPasswords.hasOwnProperty(seatId)) {
+				$('#confirm-dialog-mob-ok').css('display','none');
+				$('#confirm-dialog-mob-text').html('<div class="seat-taken-notify">'+ translator.translate('pleaseEnterPassword') + '</div>' + 
+					'<div class="box-password-wrap"><input type="text" id="seat-password" /> ' +
+					'<div class="seatreg-btn green-btn" id="password-check">Ok</div></div>' +
+					'<div id="password-error" class="d-none" style="color:red">'+ translator.translate('passwordNotCorrect') +'</div>' + 
+					'<div id="password-check-loader" class="d-none">'+ '<img alt="Loading..." src="'+ WP_Seatreg.plugin_dir_url + 'img/ajax_loader_small.gif' +'" />' +'</div>');
+			}else if(type == 'rbox' && this.selectedSeats.length < this.seatLimit ) {
 
 				if(this.status == 'run') {
 					$('#confirm-dialog-mob-text').html('<div class="add-seat-text"><h5>'+ translator.translate('add_') + ' ' + this.spotName + ' ' + nr + translator.translate('_fromRoom_') + ' ' + room + translator.translate('_toSelection') +'</h5><p>'+ translator.translate('maxSeatsToAdd') + ' ' + this.seatLimit +'</p>' + '</div>');
@@ -811,6 +831,10 @@ SeatReg.prototype.paintSeatDialog = function(clickBox) {
 	}else {
 		return false;
 	}
+};
+
+SeatReg.prototype.addEnteredSeatPassword = function(seatId, password) {
+	this.enteredSeatPasswords[seatId] = password;
 };
 
 var seatReg = new SeatReg();
@@ -1122,6 +1146,8 @@ function sendData(customFieldBack, regURL) {
 	$('#checkoput-area-inner .ajax-load').css('display','inline-block');
 
 	var mailToSend = null;
+	var seatPasswords = JSON.stringify(seatReg.enteredSeatPasswords);
+	customFieldBack = JSON.stringify(customFieldBack);
 
 	if(seatReg.selectedSeats.length > 1) {
 		mailToSend = $('#prim-mail').val();
@@ -1129,12 +1155,10 @@ function sendData(customFieldBack, regURL) {
 		mailToSend = $('#checkout-input-area .check-item').first().find('.field-input[data-field="Email"]').val();
 	}
 
-	customFieldBack = JSON.stringify(customFieldBack);
-		
 	$.ajax({
 		type: 'POST',
 		url: ajaxUrl,
-		data: $('#checkoput-area-inner').serialize() + '&custom=' + encodeURIComponent(customFieldBack) +'&action=' + 'seatreg_booking_submit' + '&c=' + regURL + '&em=' + mailToSend + '&pw=' + $('#sub-pwd').val(),
+		data: $('#checkoput-area-inner').serialize() + '&custom=' + encodeURIComponent(customFieldBack) +'&action=' + 'seatreg_booking_submit' + '&c=' + regURL + '&em=' + mailToSend + '&pw=' + $('#sub-pwd').val() + '&passwords=' + encodeURIComponent(seatPasswords),
 
 		success: function(data) {
 			$('#checkoput-area-inner .ajax-load').css('display','none');
@@ -1265,6 +1289,35 @@ $('#checkout-input-area').on('keyup','.field-input', function() {
 
 $('.refresh-btn').on('click', function() {
 	window.location.reload();
+});
+
+$('#confirm-dialog-mob-text').on('click', '#password-check', function() {
+	var seatId = $('#selected-seat').val();
+	var password = $('#seat-password').val();
+
+	$('#password-error').addClass('d-none');
+	$('#password-check-loader').removeClass('d-none');
+	
+	$.ajax({
+		type: 'POST',
+		url: ajaxUrl,
+		data: {
+			action: 'seatreg_seat_password_check',
+			password: $('#seat-password').val(),
+			'registration-code': qs['c'],
+			'seat-id': seatId
+		},
+		success: function(data) {
+			$('#password-check-loader').addClass('d-none');
+
+			if(data.success) {
+				seatReg.addEnteredSeatPassword(seatId, password);
+				seatReg.openSeatDialog($('.box[data-seat='+ seatId +']')[0]);
+			}else {
+				$('#password-error').removeClass('d-none');
+			}
+		}
+	});
 });
 
 $('#checkoput-area-inner').submit(function(e) {

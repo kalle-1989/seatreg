@@ -51,6 +51,9 @@ function seatreg_generate_registration_strings() {
     $translations->payForBookingLink = esc_html__('Click the following link to pay for the booking', 'seatreg');
     $translations->yes = esc_html__('Yes', 'seatreg');
     $translations->no = esc_html__('No', 'seatreg');
+    $translations->seatIsLocked = esc_html__('Seat is locked', 'seatreg');
+    $translations->pleaseEnterPassword = esc_html__('Please enter password', 'seatreg');
+    $translations->passwordNotCorrect = esc_html__('Password is not correct', 'seatreg');
 
 	return $translations;
 }
@@ -146,6 +149,9 @@ function seatreg_generate_admin_strings() {
     $translations->newBookingWasAddedRefreshingThaPage = esc_html__('Booking was added. Page will refresh in a second', 'seatreg');
     $translations->duplicateSeatDetected = esc_html__('Duplicate seat detected!', 'seatreg');
     $translations->emailTemplateNotCorrect = esc_html__('Email template is missing required keywords', 'seatreg');
+    $translations->lockSeat = esc_html__('Lock seat', 'seatreg');
+    $translations->setPassword = esc_html__('Set password', 'seatreg');
+    $translations->changesApplied = esc_html__('Changes applied', 'seatreg');
 
     return $translations;
 }

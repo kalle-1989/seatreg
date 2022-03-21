@@ -1198,16 +1198,33 @@ function seatreg_echo_booking($registrationCode, $bookingId) {
 		$roomData = json_decode($registration->registration_layout)->roomData;
 		$options = SeatregOptionsRepository::getOptionsByRegistrationCode($registrationCode);
 		$registrationCustomFields = json_decode($registration->custom_fields);
-
+	
 		foreach ($bookings as $booking) {
 			$booking->room_name = SeatregRegistrationService::getRoomNameFromLayout($roomData, $booking->room_uuid);
 		}
 
 		if(count($bookings)) {
+			$bookingStatus = $bookings[0]->status;
 			echo '<h2>', esc_html($registration->registration_name), '</h2>';
-			echo '<h4>', esc_html__('Booking id', 'seatreg'), ': ' , esc_html($bookingId),'</h4>';
+			
+			if($options && $options->pending_expiration && $bookingStatus === '1') {
+				$hasPaymentEntry = SeatregBookingService::checkIfBookingHasPaymentEntry($bookings[0]->booking_id);
+				$bookingDateTimestampInMinutes = ceil($bookings[0]->booking_date / 60);
+				$bookingWillBeDeletedTimestamp = $bookingDateTimestampInMinutes + (int)$options->pending_expiration;
+				$bookingTimeToLive = floor($bookingWillBeDeletedTimestamp - (time() / 60));
 
+				if($bookingTimeToLive > 0 && !$hasPaymentEntry) {
+					echo '<h3 style="color:red">', sprintf(esc_html__('This pending booking will be deleted in about %s minutes if not approved', 'seatreg'), $bookingTimeToLive), '</h3>';
+				}
+			}
+			echo '<div>', esc_html__('Booking id', 'seatreg'), ': ' , esc_html($bookingId),'</div>';
+			echo '<div>', esc_html__('Booking status', 'seatreg'), ': ' , SeatregBookingService::getBookingStatusText($bookingStatus),'</div>';
+			
+			echo '<div style="margin: 12px 0px">';
 			echo SeatregBookingService::generateBookingTable($registrationCustomFields, $bookings);
+			echo '</div>';
+
+			
 
 			if($options && $options->payment_text) {
 				echo '<h3>', esc_html__('Payment info', 'seatreg'), '</h3>';
@@ -1585,6 +1602,7 @@ function seatreg_set_up_db() {
 			booking_id varchar(40) NOT NULL,
 			conf_code char(40) NOT NULL,
 			booker_email varchar(255) NOT NULL,
+			seat_passwords text,
 			PRIMARY KEY  (id)
 		) $charset_collate;";
 
@@ -2371,6 +2389,28 @@ function seatreg_random_string($length){
 	return $str;
 }
 
+add_action( 'wp_ajax_seatreg_seat_password_check', 'seatreg_seat_password_check_callback' );
+add_action( 'wp_ajax_nopriv_seatreg_seat_password_check', 'seatreg_seat_password_check_callback' );
+function seatreg_seat_password_check_callback() {
+	if( empty($_POST['registration-code']) || empty($_POST['seat-id']) || empty($_POST['password']) ) {
+		wp_send_json_error("Missing data");
+	}
+
+	$layout = SeatregRegistrationRepository::getRegistrationLayout( $_POST['registration-code'] );
+	$hasPassword = SeatregLayoutService::checkIfSeatHasPassword($layout, $_POST['seat-id']);
+
+	if($hasPassword) {
+		$seatPassword = SeatregLayoutService::getSeatPassword($layout, $_POST['seat-id']);
+
+		if($seatPassword === $_POST['password']) {
+			wp_send_json_success("Password correct");
+		}else {
+			wp_send_json_error("Password missmatch");
+		}
+	}
+	wp_send_json_success("No password set");
+}
+
 add_action( 'wp_ajax_seatreg_booking_submit', 'seatreg_booking_submit_callback' );
 add_action( 'wp_ajax_nopriv_seatreg_booking_submit', 'seatreg_booking_submit_callback' );
 function seatreg_booking_submit_callback() {
@@ -2391,6 +2431,7 @@ function seatreg_booking_submit_callback() {
 		empty($_POST['room-uuid']) ||
 		empty($_POST['em']) ||
 		empty($_POST['c']) ||
+		empty($_POST['passwords']) ||
 		!isset($_POST['pw']) ||
 		empty($_POST['custom'])) {
 			$resp->setError('Missing data');
@@ -2411,7 +2452,8 @@ function seatreg_booking_submit_callback() {
 			$_POST['c'], 
 			$_POST['pw'], 
 			$_POST['custom'],
-			$_POST['room-uuid']) 
+			$_POST['room-uuid'],
+			$_POST['passwords']) 
 	){
 		$newBooking->validateBooking();
 	}	

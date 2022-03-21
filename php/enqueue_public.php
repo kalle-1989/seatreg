@@ -45,7 +45,7 @@ function seatreg_public_scripts_and_styles() {
 		wp_enqueue_script('date-format', SEATREG_PLUGIN_FOLDER_URL . 'registration/js/date.format.js' , array(), '1.0.0', true);
 		wp_enqueue_script('iscroll-zoom', SEATREG_PLUGIN_FOLDER_URL . 'registration/js/iscroll-zoom.js' , array(), '5.1.3', true);
 		wp_enqueue_script('jquery-powertip', SEATREG_PLUGIN_FOLDER_URL . 'js/jquery.powertip.js' , array(), '1.2.0', true);
-		wp_enqueue_script('seatreg-registration', SEATREG_PLUGIN_FOLDER_URL . 'registration/js/registration.js' , array('jquery', 'date-format', 'iscroll-zoom', 'jquery-powertip'), '1.1.1', true);
+		wp_enqueue_script('seatreg-registration', SEATREG_PLUGIN_FOLDER_URL . 'registration/js/registration.js' , array('jquery', 'date-format', 'iscroll-zoom', 'jquery-powertip'), '1.2.1', true);
 
 		$data = seatreg_get_options_reg($_GET['c']);
 		$seatsInfo = json_encode( seatreg_stats_for_registration_reg($data->registration_layout, $data->registration_code) );
@@ -55,7 +55,7 @@ function seatreg_public_scripts_and_styles() {
 	
 		$inlineScript = 'function showErrorView(title) {';
 			$inlineScript .= "jQuery('body').addClass('error-view').html('";
-				$inlineScript .= '<div>An error occured</div><img src="' . SEATREG_PLUGIN_FOLDER_URL . 'img/monkey.png" alt="monkey" /><div>title</div>';
+				$inlineScript .= '<div>An error occured</div><img src="' . SEATREG_PLUGIN_FOLDER_URL . 'img/monkey.png" alt="monkey" /><div></div>';
 			$inlineScript .= "');";
 		$inlineScript .= '}';
 		
@@ -64,7 +64,7 @@ function seatreg_public_scripts_and_styles() {
 			$inlineScript .= "var seatregTranslations = jQuery.parseJSON('" .  wp_json_encode( seatreg_generate_registration_strings() ) . "');";
 			$inlineScript .= 'var seatLimit = ' . esc_js($data->seats_at_once) . ';';
 			$inlineScript .= 'var gmail = ' . esc_js($data->gmail_required) . ';';
-			$inlineScript .= 'var dataReg = jQuery.parseJSON(' . wp_json_encode($data->registration_layout) . ');';
+			$inlineScript .= 'var dataReg = jQuery.parseJSON(' . wp_json_encode(SeatregLayoutService::hideSensitiveData($data->registration_layout)) . ');';
 			$inlineScript .= 'var roomsInfo = jQuery.parseJSON(' . wp_json_encode($seatsInfo) . ');';
 			$inlineScript .= 'var custF = jQuery.parseJSON(' . wp_json_encode($data->custom_fields) . ');';
 			$inlineScript .= 'var regTime = "' . esc_js($registrationTime) . '";';
@@ -83,6 +83,7 @@ function seatreg_public_scripts_and_styles() {
 		wp_add_inline_script('seatreg-registration', $inlineScript, 'before');
 		wp_localize_script('seatreg-registration', 'WP_Seatreg', array(
 			'SEATREG_CUSTOM_TEXT_FIELD_MAX_LENGTH' => SEATREG_CUSTOM_TEXT_FIELD_MAX_LENGTH,
+			'plugin_dir_url' => plugin_dir_url( dirname( __FILE__ ) ),
 		));
 	}
 

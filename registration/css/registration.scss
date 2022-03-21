@@ -486,6 +486,9 @@ body {
 	left: 20px;
 }
 
+.d-none {
+	display: none;
+}
 
 /*------room nav rules------*/
 
@@ -986,6 +989,15 @@ body {
 }
 #confirm-dialog-mob-text {
 	text-align: center;
+}
+
+.box-password-wrap {
+	margin-top: 12px;
+	margin-bottom: 12px;
+
+	.seatreg-btn {
+		margin-left: 8px;
+	}
 }
 
 #confirm-dialog-mob-hover {
