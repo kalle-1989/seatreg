@@ -713,7 +713,7 @@ function seatreg_generate_settings_form() {
 
 						<label for="paypal-sandbox-mode"><?php esc_html_e('PayPal sandbox mode', 'seatreg'); ?></label>
 						<p class="help-block">
-							<?php esc_html_e('Turn on sandbox mode. Lets you test payments with your sandbox account. Don\'t forget to change business email and button id.', 'seatreg'); ?>.
+							<?php esc_html_e('Turn on sandbox mode. Lets you test payments with your sandbox account. Don\'t forget to change business email and button id.', 'seatreg'); ?>
 						</p>
 						<div class="checkbox">
 							<label>
@@ -742,7 +742,7 @@ function seatreg_generate_settings_form() {
 						</label>
 					</div>
 					<div class="payment-configuration">
-						<label for="stripe_api_key"><?php esc_html_e('Stripe API secret key', 'seatreg'); ?></label>
+						<label for="stripe-api-key"><?php esc_html_e('Stripe API secret key', 'seatreg'); ?></label>
 						<p class="help-block">
 							<?php esc_html_e('Please enter your Stripe API secret key', 'seatreg'); ?>.
 						</p>
@@ -766,6 +766,51 @@ function seatreg_generate_settings_form() {
 				<?php endif; ?>
 			</div>
 
+			<div class="form-group">
+				<label for="quickpay"><?php esc_html_e('Quickpay payments', 'seatreg'); ?></label>
+				<p class="help-block">
+					<?php esc_html_e('Allow and configure Quickpay payments. Enables you to ask money for bookings. ', 'seatreg'); ?>
+				</p>
+				<div class="checkbox">
+					<label>
+						<input type="checkbox" id="quickpay" name="quickpay-payments" value="0" <?php echo $options[0]->quickpay_payments == '1' ? 'checked':'' ?> >
+						<?php esc_html_e('Turn on Quickpay payments', 'seatreg'); ?>
+					</label>
+					</div>
+					<div class="payment-configuration">
+						<label for="quickpay-merchant-account-id"><?php esc_html_e('Merchant Account id', 'seatreg'); ?></label>
+						<p class="help-block">
+							<?php esc_html_e('Please enter your Quickpay merchant Account id', 'seatreg'); ?>.
+						</p>
+						<input type="text" class="form-control" id="quickpay-merchant-account-id" name="quickpay-merchant-account-id" autocomplete="off" placeholder="<?php echo esc_html('Quickpay merchant Account id', 'seatreg'); ?>" value="<?php echo esc_html($options[0]->quickpay_merchant_account_id); ?>"> 
+						<br>
+
+						<label for="quickpay-agreement-id"><?php esc_html_e('User agreement id', 'seatreg'); ?></label>
+						<p class="help-block">
+							<?php esc_html_e('Please enter User Agreement id', 'seatreg'); ?>.
+						</p>
+						<input type="text" class="form-control" id="quickpay-agreement-id" name="quickpay-agreement-id" autocomplete="off" placeholder="<?php echo esc_html('User Agreement id', 'seatreg'); ?>" value="<?php echo esc_html($options[0]->quickpay_agreement_id); ?>"> 
+						<br>
+
+						<label for="quickpay-agreement-api-key"><?php esc_html_e('User agreement API key', 'seatreg'); ?></label>
+						<p class="help-block">
+							<?php esc_html_e('Please enter User Agreement API key', 'seatreg'); ?>.
+						</p>
+						<input type="text" class="form-control" id="quickpay-agreement-api-key" name="quickpay-agreement-api-key" autocomplete="off" placeholder="<?php echo esc_html('User Agreement API key', 'seatreg'); ?>" value="<?php echo esc_html($options[0]->quickpay_agreement_api_key); ?>"> 
+						<br>
+
+						<label for="payment-mark-confirmed-quickpay"><?php esc_html_e('Set paid booking approved', 'seatreg'); ?></label>
+						<p class="help-block">
+							<?php esc_html_e('Set booking approved automatically when payment has been completed', 'seatreg'); ?>.
+						</p>
+						<div class="checkbox">
+							<label>
+								<input type="checkbox" id="payment-mark-confirmed-quickpay" name="payment-mark-confirmed-quickpay" value="0" <?php echo $options[0]->payment_mark_confirmed_quickpay == '1' ? 'checked': ''; ?> >
+								<?php esc_html_e('Set approved', 'seatreg'); ?>
+							</label>
+						</div>
+					</div>
+			</div>
 
 			<div class="form-group">
 				<div class="user-custom-field-options border-box option-box" style="border-bottom:none">
