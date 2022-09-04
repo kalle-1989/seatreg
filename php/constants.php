@@ -3,7 +3,7 @@ define('SEATREG_PLUGIN_FOLDER_DIR', plugin_dir_path( dirname( __FILE__ ) ));
 define('SEATREG_PLUGIN_FOLDER_URL', plugin_dir_url( dirname( __FILE__ ) ));
 
 // DB
-define('SEATREG_DB_VERSION', '1.13');
+define('SEATREG_DB_VERSION', '1.14');
 
 // Validation
 define('SEATREG_MANAGER_ALLOWED_ORDER', array('id', 'date', 'name', 'room', 'nr'));
@@ -39,6 +39,11 @@ define('SEATREG_STRIPE_WEBHOOK_DESCRIPTION', 'WordPress SeatReg plugin webhook')
 define('SEATREG_STRIPE_WEBHOOK_CALLBACK_URL', SEATREG_PAYMENT_CALLBACK_URL . '?seatreg=stripe-webhook-callback');
 define('SEATREG_STRIPE_WEBHOOK_SUCCESS_URL', SEATREG_PAYMENT_CALLBACK_URL . '?seatreg=payment-return');
 define('SEATREG_STRIPE_WEBHOOK_CANCEL_URL', SEATREG_PAYMENT_CALLBACK_URL . '?seatreg=booking-status');
+
+// Quickpay
+define('SEATREG_QUICKPAY_CONTINUE_URL', SEATREG_PAYMENT_CALLBACK_URL . '?seatreg=quickpay-continue');
+define('SEATREG_QUICKPAY_CANCEL_URL', SEATREG_PAYMENT_CALLBACK_URL  . '?seatreg=booking-status');
+define('SEATREG_QUICKPAY_CALLBACK_URL', SEATREG_PAYMENT_CALLBACK_URL  . '?seatreg=quickpay-callback');
 
 // Status
 define('SEATREG_BOOKING_DEFAULT', 0);

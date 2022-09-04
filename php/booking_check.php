@@ -50,8 +50,9 @@
 			echo ' <button id="send-receipt" data-booking-id="'. $bookingId .'" data-registration-id="'. $registrationId .'">'. __('Send again', 'seatreg') .'</button><br>';
 		}
 
-		if( ($bookingData->paypal_payments === '1' || $bookingData->stripe_payments === '1') && $bookingData->payment_status === null ) {
+		if( ($bookingData->paypal_payments === '1' || $bookingData->stripe_payments === '1' || $bookingData->quickbook_payments === '1') && $bookingData->payment_status === null ) {
 			$bookingTotalCost = SeatregBookingService::getBookingTotalCost($bookingId, $bookingData->registration_layout);
+			
 
 			if( $bookingTotalCost > 0 ) {
 				?>
@@ -78,6 +79,23 @@
 				
 			if( $bookingData->stripe_payments === '1' && $bookingTotalCost > 0 ) {
 				echo SeatregPaymentService::generateStripeCheckoutForm($bookingId);
+			}
+
+			if( $bookingData->quickpay_payments === '1' && $bookingTotalCost > 0 ) {
+				$returnUrl = SEATREG_QUICKPAY_CONTINUE_URL . '&id=' . $bookingId;
+				$cancelUrl = SEATREG_QUICKPAY_CANCEL_URL . '&registration=' . $registrationId . '&id=' . $bookingId;
+				
+				echo SeatregPaymentService::generateQuickpayCheckoutForm(
+					$bookingId, 
+					$bookingData->quickpay_merchant_account_id, 
+					$bookingData->quickpay_agreement_id,
+					$bookingData->quickpay_agreement_api_key,
+					$bookingTotalCost,
+					$bookingData->paypal_currency_code,
+					$returnUrl,
+					$cancelUrl,
+					SEATREG_QUICKPAY_CALLBACK_URL
+				);
 			}
 			
 			?>

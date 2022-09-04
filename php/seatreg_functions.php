@@ -1682,6 +1682,10 @@ function seatreg_set_up_db() {
 			stripe_api_key varchar(255) DEFAULT NULL,
 			payment_completed_set_booking_confirmed_stripe tinyint(1) NOT NULL DEFAULT 0,
 			stripe_webhook_secret varchar(255) DEFAULT NULL,
+			quickpay_payments tinyint(1) NOT NULL DEFAULT 0,
+			quickpay_merchant_account_id varchar(255) DEFAULT NULL,
+			quickpay_agreement_id varchar(255) DEFAULT NULL,
+			quickpay_agreement_api_key varchar(255) DEFAULT NULL,
 			PRIMARY KEY  (id)
 		) $charset_collate;";
 	  
@@ -2344,6 +2348,12 @@ function seatreg_update() {
 		$_POST['stripe-payments'] = 1;
 	}
 
+	if(!isset($_POST['quickpay-payments'])) {
+		$_POST['quickpay-payments'] = 0;  
+	}else {
+		$_POST['quickpay-payments'] = 1;
+	}
+
 	if(!isset($_POST['payment-mark-confirmed-stripe'])) {
 		$_POST['payment-mark-confirmed-stripe'] = 0;  
 	}else {
@@ -2392,6 +2402,10 @@ function seatreg_update() {
 			'stripe_payments' => $_POST['stripe-payments'],
 			'stripe_api_key' => $_POST['stripe-api-key'],
 			'payment_completed_set_booking_confirmed_stripe' => $_POST['payment-mark-confirmed-stripe'],
+			'quickpay_payments' => $_POST['quickpay-payments'],
+			'quickpay_merchant_account_id' => sanitize_text_field($_POST['quickpay-merchant-account-id']),
+			'quickpay_agreement_id' => sanitize_text_field($_POST['quickpay-agreement-id']),
+			'quickpay_agreement_api_key' => sanitize_text_field($_POST['quickpay-agreement-api-key']),
 		),
 		array(
 			'registration_code' => sanitize_text_field($_POST['registration_code'])

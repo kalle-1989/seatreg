@@ -123,6 +123,59 @@ class SeatregPaymentService {
         <?php
     }
 
+    public static function getQuickbookFormChecksum($params, $api_key) {
+        $flattened_params = self::flattenQuickPayParams($params);
+        ksort($flattened_params);
+        $base = implode(" ", $flattened_params);
+    
+        return hash_hmac("sha256", $base, $api_key);
+    }
+
+    public static function flattenQuickPayParams($obj, $result = array(), $path = array()) {
+        if (is_array($obj)) {
+            foreach ($obj as $k => $v) {
+                $result = array_merge($result, self::flattenQuickPayParams($v, $result, array_merge($path, array($k))));
+            }
+        } else {
+            $result[implode("", array_map(function($p) { return "[{$p}]"; }, $path))] = $obj;
+        }
+    
+        return $result;
+    }
+
+    /**
+     *
+     * Generate Quickpay HTML checkout Form
+     *
+    */
+    public static function generateQuickpayCheckoutForm($bookingId, $merchantId, $agreementId, $agreementApiKey, $amount, $currency, $continueurl, $cancelUrl, $callbackurl) {
+        // currently Quickpay wont allow order_id to be creater than 20 char so lets make $bookingId shorter
+        $bookingId = strlen($bookingId) > 20 ? substr($bookingId, 0, 20) : $bookingId;
+
+        $params = array(
+            "version"      => "v10",
+            "merchant_id"  => esc_html($merchantId),
+            "agreement_id" => esc_html($agreementId),
+            "order_id"     => esc_html($bookingId),
+            "amount"       => esc_html($amount),
+            "currency"     => esc_html($currency),
+            "continueurl"  => urlencode($continueurl),
+            "cancelurl"    => urlencode($cancelUrl),
+            "callbackurl"  => urlencode($callbackurl),
+        );
+
+        ?>
+            <form method="POST" action="https://payment.quickpay.net">
+                <?php foreach($params as $key => $value): ?>
+                    <input type="hidden" name="<?php echo $key; ?>" value="<?php echo $value; ?>">
+                <?php endforeach; ?>
+
+                <input type="hidden" name="checksum" value="<?php echo self::getQuickbookFormChecksum($params, $agreementApiKey); ?>">
+                <input type="submit" value="Continue to payment...">
+            </form>
+        <?php
+    }
+
     /**
      *
      * Change payment status
