@@ -1631,7 +1631,6 @@ $('.move-action').on('click', function() {
 	}
 });
 
-/* Deactivate Scrolling/Zooming
 $('#middle-section').on( 'DOMMouseScroll mousewheel', function ( event ) {
 	 event.preventDefault();
 	 var mouseX = event.originalEvent.clientX;
@@ -1645,7 +1644,6 @@ $('#middle-section').on( 'DOMMouseScroll mousewheel', function ( event ) {
   //prevent page fom scrolling
   return false;
 });
-*/
 
 function scrollDown(mouseX, mouseY) {
 	if(myScroll != null) {
