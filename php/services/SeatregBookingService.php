@@ -117,7 +117,6 @@ class SeatregBookingService {
             <tr>
             <th style=";border:1px solid black;text-align: left;padding: 6px;">' . __('Name', 'seatreg') . '</th>
             <th style=";border:1px solid black;text-align: left;padding: 6px;"">' . $spotName . '</th>
-            <th style=";border:1px solid black;text-align: left;padding: 6px;"">' . __('Room', 'seatreg') . '</th>
             <th style=";border:1px solid black;text-align: left;padding: 6px;"">' . __('Email', 'seatreg') . '</th>';
 
         if($hasCalendarDate) {
@@ -134,7 +133,6 @@ class SeatregBookingService {
             $bookingTable .= '<tr>
                 <td style=";border:1px solid black;padding: 6px;"">'. esc_html($booking->first_name . ' ' .  $booking->last_name) .'</td>
                 <td style=";border:1px solid black;padding: 6px;"">'. esc_html($booking->seat_nr) . '</td>
-                <td style=";border:1px solid black;padding: 6px;"">'. esc_html($booking->room_name) . '</td>
                 <td style=";border:1px solid black;padding: 6px;"">'. esc_html($booking->email) . '</td>';
 
                 if($hasCalendarDate) {
