@@ -859,7 +859,10 @@ SeatReg.prototype.generateCustomField = function(custom) {
 
 	if(custom.type == 'text') {
 		var fieldInput = $('<input type="text" name="'+ custom.label +'[]" class="field-input" data-field="' + custom.label + '" data-type="' +  custom.type +'" maxlength="'+ WP_Seatreg.SEATREG_CUSTOM_TEXT_FIELD_MAX_LENGTH +'">');
-	}else if(custom.type == 'check') {
+        } else if (custom.type == 'textarea') {
+            var fieldInput = $('<textarea name="' + custom.label + '[]" class="field-input" data-field="' + custom.label + '" data-type="' + custom.type + '" value="' + custom.label + '">');
+	
+    }else if(custom.type == 'check') {
 		var fieldInput = $('<input type="checkbox" name="'+ custom.label +'[]" class="field-input" data-field="' + custom.label + '" data-type="' +  custom.type + '" value="'+ custom.label +'">');
 	}else if(custom.type == 'sel') {
 		var fieldInput = $('<select name="'+ custom.label +'[]" class="field-input" data-type="' + custom.type + '"></select>');
@@ -1258,6 +1261,11 @@ function validateInput(inputField) {
 
 	var value = inputField.val();
 
+        // Exclude Textarea from validation
+        if(inputField.attr('data-type') == 'textarea') {
+            	return true;
+        }
+
 	if(value == '') {
 		inputField.parent().siblings('.field-error').text(translator.translate('emptyField')).css('display','block');
 
@@ -1334,6 +1342,8 @@ function collectData() {
 
 			if(type == 'text') {
 				customFieldPack.push(new CustomData($(this).attr('data-label'), $(this).find('.field-input').val()));
+                        }else if (type == 'textarea') {
+                                customFieldPack.push(new CustomData($(this).attr('data-label'), $(this).find('.field-input').val()));                                
 			}else if(type == 'check') {
 				customFieldPack.push(new CustomData($(this).attr('data-label'), $(this).find('.field-input').is(":checked") ? '1' : '0') );
 			}else if(type == 'sel') {
