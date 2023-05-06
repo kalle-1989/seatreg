@@ -990,7 +990,10 @@ SeatReg.prototype.paintSeatDialog = function(clickBox) {
 				if(this.status == 'run') {
 					var maxPlacesText = this.usingSeats ? translator.translate('maxSeatsToAdd') : translator.translate('maxPlacesToAdd');
 					
+                                        /* Remove "Add" text, SpotName, Room and SeatLimit from confirm dialog
 					$('#confirm-dialog-mob-text').html('<div class="add-seat-text"><h5>'+ translator.translate('add_') + ' ' + this.spotName + ' ' + seatPrefix + nr + translator.translate('_fromRoom_') + ' ' + room + translator.translate('_toSelection') +'</h5><p>'+ maxPlacesText + ' ' + this.seatLimit +'</p>' + '</div>');
+					*/
+                                        $('#confirm-dialog-mob-text').html('<div class="add-seat-text"><h5>' + '"' + seatPrefix + nr + '"' + translator.translate('_toSelection') +'</h5>' + '</div>');
 
 					if(this.isPaymentEnabled() && this.payPalCurrencyCode && price > 0) {
 						var placeCostText = this.usingSeats ? translator.translate('seatCosts_') : translator.translate('placeCosts_');
