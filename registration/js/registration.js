@@ -775,7 +775,10 @@ SeatReg.prototype.generateCheckout = function(arrLen) {
 
 	for(var i = 0; i < arrLen; i++) {
 		var checkItem = $('<div class="check-item"></div>');
-		var checkItemHeader = $('<div class="check-item-head">'+ this.spotName +' No. <span>' + this.selectedSeats[i].nr + '</span><br><span>' + this.selectedSeats[i].room + '</span></div>');
+                /* Remove spotName and room name from checkout header	
+                var checkItemHeader = $('<div class="check-item-head">'+ this.spotName +' No. <span>' + this.selectedSeats[i].nr + '</span><br><span>' + this.selectedSeats[i].room + '</span></div>');
+                */            
+                var checkItemHeader = $('<div class="check-item-head">' + this.selectedSeats[i].nr + '</span></div>');
 		var documentFragment2 = $(document.createDocumentFragment());
 		var arrLen2 = this.selectedSeats[i].defFields.length;
 		var isLastCheckItem = i === arrLen - 1;
