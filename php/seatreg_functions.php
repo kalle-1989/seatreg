@@ -919,7 +919,7 @@ function seatreg_generate_settings_form() {
 											echo ' <i class="fa fa-times-circle remove-cust-item"></i>';
 										echo '</div>';
 
-									}else if($custFields[$i]->type == 'text'){
+                                                                        }else if($custFields[$i]->type == 'text'){
 										?>
 											<div class="custom-container" data-type="text" data-label="<?php echo $custFields[$i]->label; ?>">
 												<label><span class="l-text"><?php echo esc_html($custFields[$i]->label); ?> </span>
@@ -930,6 +930,16 @@ function seatreg_generate_settings_form() {
 											</div>
 										<?php
 
+									}else if($custFields[$i]->type == 'textarea'){
+										?>
+											<div class="custom-container" data-type="textarea" data-label="<?php echo $custFields[$i]->label; ?>">
+												<label><span class="l-text"><?php echo esc_html($custFields[$i]->label); ?> </span>
+													<textarea></textarea>
+												</label>
+												<i class="fa fa-times-circle remove-cust-item"></i>
+											</div>
+										<?php	
+                                                                                
 									}else if($custFields[$i]->type == 'check') {
 										echo '<div class="custom-container" data-type="check" data-label="'. $custFields[$i]->label .'">';
 											echo '<label><span class="l-text">', esc_html($custFields[$i]->label), '</span> <input type="checkbox" /></label><i class="fa fa-times-circle remove-cust-item"></i>';
@@ -954,6 +964,7 @@ function seatreg_generate_settings_form() {
 							<label><?php esc_html_e('Type', 'seatreg'); ?>:
 								<select class="custom-field-select">
 									<option data-type="field"><?php esc_html_e('Text', 'seatreg'); ?></option>
+                                                                        <option data-type="textarea"><?php esc_html_e('Multiline text', 'seatreg'); ?></option>
 									<option data-type="checkbox"><?php esc_html_e('Checkbox', 'seatreg'); ?></option>
 									<option data-type="select"><?php esc_html_e('Select', 'seatreg'); ?></option> 
 								</select>
@@ -1259,7 +1270,7 @@ function seatreg_customfield_with_value($custom_field, $submitted_custom_data) {
 					echo '<i class="fa fa-times custom-field-value" data-type="check" data-checked="false" aria-hidden="true"></i></div>';
 				}
 			}
-			if( $custom_field['type'] === 'text' ) {
+			if( $custom_field['type'] === 'text' || $custom_field['type'] === 'textarea') {
 				echo '<span class="custom-field-value" data-type="text">', esc_html($submitted_custom_data[$j]['value']), '</span></div>';
 			}
 			if( $custom_field['type'] === 'sel' ) {

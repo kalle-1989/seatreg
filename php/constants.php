@@ -11,7 +11,7 @@ define('SEATREG_DB_VERSION', '1.22');
 define('SEATREG_MANAGER_ALLOWED_ORDER', array('id', 'date', 'name', 'room', 'nr'));
 define('SEATREG_REGISTRATION_NAME_MAX_LENGTH', 255);
 define('SEATREG_REGISTRATION_SEARCH_MAX_LENGTH', 60);
-define('SEATREG_CUSTOM_FIELD_TYPES', array('text', 'check', 'sel'));
+define('SEATREG_CUSTOM_FIELD_TYPES', array('text', 'textarea', 'check', 'sel'));
 define('SEATREG_CUSTOM_TEXT_FIELD_MAX_LENGTH', 50);
 define('SEATREG_DEFAULT_INPUT_MAX_LENGHT', 100);
 

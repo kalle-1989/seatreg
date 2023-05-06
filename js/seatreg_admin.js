@@ -752,8 +752,9 @@ $('#seatreg-booking-manager').on('click', '.edit-btn',function() {
 					return '<option>' + option + '</option>';
 				})  + '</select>' + '</div>');
 			}
-
-		}else {
+                }else if(type === "textarea") {
+			modalCutsom.append('<div class="modal-custom"><label class="modal-custom-l" for="'+ $(this).find('.custom-field-label').text() +'"><h5>'+ $(this).find('.custom-field-label').text() +'</h5></label><br><textarea id="'+ $(this).find('.custom-field-label').text() +'" class="modal-custom-t" value="'+ $(this).find('.custom-field-value').text() +'</textarea></div>');
+                }else {
 			modalCutsom.append('<div class="modal-custom"><label class="modal-custom-l" for="'+ $(this).find('.custom-field-label').text() +'"><h5>'+ $(this).find('.custom-field-label').text() +'</h5></label><br><input type="text" id="'+ $(this).find('.custom-field-label').text() +'" class="modal-custom-v" value="'+ $(this).find('.custom-field-value').text() +'" /></div>');
 		}
 	});
@@ -1131,6 +1132,11 @@ function seatreg_insert_custom_field(label,type,options, placeToPut) {
 		if(type == 'field') {
 			var cusLabel = $('<label><span class="l-text">'+ label +'</span><input type="text"/></label> <span class="seatreg-ui-tooltip" title="Prevents booking when same input value provided">Unique value required</span> <input type="checkbox" class="unique-input" /> <i class="fa fa-times-circle remove-cust-item"></i>'); 
 			containerDiv.attr('data-type','text').append(cusLabel);
+                
+                }else if(type == 'textarea') {
+                        var cusLabel = $('<label><span class="l-text">'+ label +'</span><textarea></textarea></label> <i class="fa fa-times-circle remove-cust-item"></i>'); 
+			containerDiv.attr('data-type','textarea').append(cusLabel);
+                        
 		}else if(type == 'checkbox') {
 			var cusLabel = $('<label><span class="l-text">'+ label +'</span><input type="checkbox"/></label><i class="fa fa-times-circle remove-cust-item"></i>'); 
 			containerDiv.attr('data-type','check').append(cusLabel);
@@ -1333,5 +1339,3 @@ function initTooltips() {
 initTooltips();
 
 })(jQuery);
-
-
