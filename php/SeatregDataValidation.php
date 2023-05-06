@@ -478,12 +478,7 @@ class SeatregDataValidation {
         if( !property_exists($personCustomField, 'label') || !is_string($personCustomField->label) ) {
             $validationStatus->setInvalid('Custom field label is missing or invalid');
             return $validationStatus;
-        }
-     
-        if( !property_exists($personCustomField, 'value') || !preg_match('/^[\p{L}\p{N}\\s:\/.-]+$/u', $personCustomField->value)) {
-            $validationStatus->setInvalid('Custom field value is missing or invalid');
-            return $validationStatus;
-        }
+        }    
 
         $duplicates = array_filter($personCustomFields, function($cust) use ($personCustomField) {
             return $cust->label === $personCustomField->label;
@@ -511,6 +506,10 @@ class SeatregDataValidation {
         if($assosiatedCustomField->type === 'text') {
             if( strlen($personCustomField->value) > SEATREG_CUSTOM_TEXT_FIELD_MAX_LENGTH ) {
                 $validationStatus->setInvalid('Text field too long');
+                return $validationStatus;
+            }
+            if( !preg_match('/^[\p{L}\p{N}\\s:\/.-]+$/u', $personCustomField->value)) {
+                $validationStatus->setInvalid('Custom field value is missing or invalid');
                 return $validationStatus;
             }
             if( $assosiatedCustomField->unique === true ) {
