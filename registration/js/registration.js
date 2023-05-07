@@ -1129,18 +1129,24 @@ function setMiddleSecSize(roomSizeWidth, roomSizeHeight) {
 	}
 
 	//height of middle
-
 	if(roomSizeHeight > spaceForMiddleHeight) {
 		needVerticScroll = true;
 		$('#box-wrap').css('height', spaceForMiddleHeight);
 		$('#boxes').css('height',roomSizeHeight + 15);
 
 	}else {
-		$('#box-wrap, #boxes').css('height', roomSizeHeight);
+                //Resize roome size height and iFrame
+		var fitF = fitFactor();
+		var seatregFrame = parent.document.getElementById("seatregFrameID")
+		
+		var rezRoomSizeHeight = roomSizeHeight * fitF + 20;
+		var rezFrameHeight =  seatregFrame.scrollHeight * fitF; 
+		
+		$('#box-wrap, #boxes').css('height', rezRoomSizeHeight);
+		seatregFrame.height = rezFrameHeight;
 	}
 
 	//legends height
-
 	if(screenWidth < 1024) {
 		$('#legend-wrapper').css('display','none');
 	}
