@@ -401,12 +401,14 @@
 					bronSign.className = "bron-sign";
 					tooltipContent += '<div class="seatreg-tooltip-row">' + translator.translate('Pending') + '</div>';
 					box.appendChild(bronSign);
+                                        box.classList.add("bron-seat");
 				}else if(loc[i].status == "takenRegister") {
 					box.setAttribute('data-status','tak');
 					var takSign = document.createElement('div');
 					takSign.className = "taken-sign";
 					tooltipContent += '<div class="seatreg-tooltip-row">' + translator.translate('Booked') + '</div>';
 					box.appendChild(takSign);
+                                        box.classList.add("taken-seat");
 				}
 				clickable = true;
 			}
