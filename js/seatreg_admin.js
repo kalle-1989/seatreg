@@ -753,7 +753,7 @@ $('#seatreg-booking-manager').on('click', '.edit-btn',function() {
 				})  + '</select>' + '</div>');
 			}
                 }else if(type === "textarea") {
-			modalCutsom.append('<div class="modal-custom"><label class="modal-custom-l" for="'+ $(this).find('.custom-field-label').text() +'"><h5>'+ $(this).find('.custom-field-label').text() +'</h5></label><br><textarea id="'+ $(this).find('.custom-field-label').text() +'" class="modal-custom-t" value="'+ $(this).find('.custom-field-value').text() +'</textarea></div>');
+modalCutsom.append('<div class="modal-custom"><label class="modal-custom-l" for="'+ $(this).find('.custom-field-label').text() +'"><h5>'+ $(this).find('.custom-field-label').text() +'</h5></label><br><textarea id="'+ $(this).find('.custom-field-label').text() +'" class="modal-custom-v">' + $(this).find('.custom-field-value').text()+'</textarea></div>');
                 }else {
 			modalCutsom.append('<div class="modal-custom"><label class="modal-custom-l" for="'+ $(this).find('.custom-field-label').text() +'"><h5>'+ $(this).find('.custom-field-label').text() +'</h5></label><br><input type="text" id="'+ $(this).find('.custom-field-label').text() +'" class="modal-custom-v" value="'+ $(this).find('.custom-field-value').text() +'" /></div>');
 		}
