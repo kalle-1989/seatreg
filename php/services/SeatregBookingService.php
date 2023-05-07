@@ -115,8 +115,8 @@ class SeatregBookingService {
 
         $bookingTable = '<table style="border: 1px solid black;border-collapse: collapse;">
             <tr>
-            <th style=";border:1px solid black;text-align: left;padding: 6px;">' . __('Name', 'seatreg') . '</th>
             <th style=";border:1px solid black;text-align: left;padding: 6px;"">' . $spotName . '</th>
+            <th style=";border:1px solid black;text-align: left;padding: 6px;">' . __('Name', 'seatreg') . '</th>
             <th style=";border:1px solid black;text-align: left;padding: 6px;"">' . __('Email', 'seatreg') . '</th>';
 
         if($hasCalendarDate) {
@@ -131,8 +131,8 @@ class SeatregBookingService {
         foreach ($bookings as $booking) {
             $bookingCustomFields = json_decode($booking->custom_field_data);
             $bookingTable .= '<tr>
+                <td style=";border:1px solid black;padding: 6px;"">'. esc_html($booking->seat_nr) . '</td>                
                 <td style=";border:1px solid black;padding: 6px;"">'. esc_html($booking->first_name . ' ' .  $booking->last_name) .'</td>
-                <td style=";border:1px solid black;padding: 6px;"">'. esc_html($booking->seat_nr) . '</td>
                 <td style=";border:1px solid black;padding: 6px;"">'. esc_html($booking->email) . '</td>';
 
                 if($hasCalendarDate) {
