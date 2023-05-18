@@ -5,7 +5,7 @@ define('SEATREG_HOME_PAGE', admin_url('/admin.php?page=seatreg-welcome'));
 define('SEATREG_SETTINGS_PAGE', admin_url('/admin.php?page=seatreg-options'));
 
 // DB
-define('SEATREG_DB_VERSION', '1.22');
+define('SEATREG_DB_VERSION', '1.23');
 
 // Validation
 define('SEATREG_MANAGER_ALLOWED_ORDER', array('id', 'date', 'name', 'room', 'nr'));
@@ -64,3 +64,10 @@ define('SEATREG_TEMPLATE_BOOKING_ID', '[booking-id]');
 //Time related
 define('CALENDAR_DATE_FORMAT', 'Y-m-d');
 define('CALENDAR_DATE_PICKER_REGEX', '/^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}$/');
+
+//SeatReg actions
+define('SEATREG_ACTION_BOOKING_SUBMITTED', 'seatreg_action_booking_submitted');
+define('SEATREG_ACTION_BOOKING_MANUALLY_ADDED', 'seatreg_action_booking_manually_added');
+define('SEATREG_ACTION_BOOKING_PENDING', 'seatreg_action_booking_pending');
+define('SEATREG_ACTION_BOOKING_APPROVED', 'seatreg_action_booking_approved');
+define('SEATREG_ACTION_BOOKING_REMOVED', 'seatreg_action_booking_removed');

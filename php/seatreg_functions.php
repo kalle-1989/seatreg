@@ -986,6 +986,12 @@ function seatreg_generate_settings_form() {
 				</div>	
 			</div>
 
+			<div class="form-group">
+				<label for="custom-styles"><?php esc_html_e('Custom styles', 'seatreg'); ?></label>
+				<p class="help-block"><?php esc_html_e('Enter custom CSS rules for registration page', 'seatreg'); ?>.</p>
+				<textarea class="form-control" id="custom-styles" name="custom-styles" placeholder="<?php esc_html_e('Enter CSS rules', 'seatreg')?>"><?php echo esc_html($options[0]->custom_styles); ?></textarea>
+			</div>
+
 			<input type='hidden' name='action' value='seatreg-form-submit' />
 			<input type="hidden" name="registration_code" value="<?php echo esc_attr($options[0]->registration_code); ?>"/>
 
@@ -1860,6 +1866,7 @@ function seatreg_set_up_db() {
 			custom_payment tinyint(0) NOT NULL DEFAULT 0,
 			custom_payment_title varchar(255) DEFAULT NULL,
 			custom_payment_description text,
+			custom_styles text,
 			PRIMARY KEY  (id)
 		) $charset_collate;";
 	  
@@ -2166,6 +2173,7 @@ function seatreg_confirm_or_delete_booking($action, $regCode) {
 	global $wpdb;
 
 	if($action->action == 'conf') {
+
 		$wpdb->update( 
 			$seatreg_db_table_names->table_seatreg_bookings,
 			array( 
@@ -2177,7 +2185,10 @@ function seatreg_confirm_or_delete_booking($action, $regCode) {
 			'%s'
 		);
 		seatreg_add_activity_log('booking', $action->booking_id, 'Booking approved (Booking manager)');
+		SeatregActionsService::triggerBookingApprovedAction($action->booking_id);
+
 	}else if($action->action == 'del') {
+
 		$wpdb->delete( 
 			$seatreg_db_table_names->table_seatreg_bookings,
 			array(
@@ -2187,7 +2198,10 @@ function seatreg_confirm_or_delete_booking($action, $regCode) {
 			'%s'
 		);
 		seatreg_add_activity_log('booking', $action->booking_id, sprintf('Seat %s from room %s deleted from booking (Booking manager)', $action->seat_nr, $action->room_name));
+		SeatregActionsService::triggerBookingRemovedAction($action->booking_id);
+
 	}else if($action->action == 'unapprove') {
+
 		$wpdb->update( 
 			$seatreg_db_table_names->table_seatreg_bookings,
 			array( 
@@ -2199,6 +2213,7 @@ function seatreg_confirm_or_delete_booking($action, $regCode) {
 			'%s'
 		);
 		seatreg_add_activity_log('booking', $action->booking_id, 'Booking unapproved (Booking manager)');
+		SeatregActionsService::triggerBookingPendingAction($action->booking_id);
 	}
 }
 
@@ -2517,6 +2532,7 @@ function seatreg_update() {
 	if( isset($_POST['paypal-payments']) && ($_POST['paypal-business-email'] === "" || $_POST['paypal-button-id'] === "" || $_POST['paypal-currency-code'] === "" ) ) {
 		wp_die('Missing PayPal configuration');
 	}
+
 	if( isset($_POST['stripe-payments']) && ($_POST['stripe-api-key'] === "" || $_POST['paypal-currency-code'] === "") ) {
 		wp_die('Missing Stripe configuration');
 	}
@@ -2638,6 +2654,12 @@ function seatreg_update() {
 		$_POST['custom-payment'] = 1;
 	}
 
+	if( !empty($_POST['custom-styles']) ) {
+		$_POST['custom-styles'] = wp_kses($_POST['custom-styles'], array( '\'', '\"' ));
+	}else {
+		$_POST['custom-styles'] = null;
+	}
+
 	$oldOptions = SeatregOptionsRepository::getOptionsByRegistrationCode(sanitize_text_field($_POST['registration_code']));
 
 	$status1 = $wpdb->update(
@@ -2681,6 +2703,7 @@ function seatreg_update() {
 			'custom_payment' => $_POST['custom-payment'],
 			'custom_payment_title' => $_POST['custom-payment-title'],
 			'custom_payment_description' => $_POST['custom-payment-description'],
+			'custom_styles' => $_POST['custom-styles'],
  		),
 		array(
 			'registration_code' => sanitize_text_field($_POST['registration_code'])
@@ -3163,6 +3186,7 @@ function seatreg_add_booking_with_manager_callback() {
 	}));
 	$addingStatusCount = count($addingStatus);
 	$bookingData = SeatregBookingRepository::getDataRelatedToBooking($bookingId);
+	SeatregActionsService::triggerBookingManuallyAddedAction($bookingId);
 	
 	if( $successStatusCount === $addingStatusCount ) {
 		$selectedStatus = $bookingStatus === '1' ? 'pending' : 'approved';
