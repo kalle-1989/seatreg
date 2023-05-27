@@ -397,11 +397,13 @@
 			if(loc[i].status !== "noStatus") {
 				if(loc[i].status == "bronRegister") {
 					box.setAttribute('data-status','bron');
+                                        box.classList.add("bron-seat");
 					var bronSign = document.createElement('div');
 					bronSign.className = "bron-sign";
 					tooltipContent += '<div class="seatreg-tooltip-row">' + translator.translate('Pending') + '</div>';
 					box.appendChild(bronSign);
 				}else if(loc[i].status == "takenRegister") {
+					box.classList.add("taken-seat");
 					box.setAttribute('data-status','tak');
 					var takSign = document.createElement('div');
 					takSign.className = "taken-sign";
@@ -442,6 +444,7 @@
 			}
 
 			if(loc[i].hasOwnProperty('lock')) {
+                                box.classList.add("locked-seat");
 				box.setAttribute('data-lock', loc[i].lock);
 			}
 
