@@ -101,7 +101,8 @@
 			</div>
 			<div class="modal-body">
 				<div class="color-dialog-info"></div>
-				<div id="picker" class="color-picker-wrap"></div>
+				<div id="picker_seat" class="color-picker-wrap"></div>
+                                <div id="picker_seat_taken" class="color-picker-wrap"></div>
 			</div>
 			<div class="modal-footer">
 				<button type="button" class="btn btn-default" data-dismiss="modal"><?php esc_html_e('Close', 'seatreg');?></button>			
