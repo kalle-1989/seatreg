@@ -33,6 +33,7 @@
 		}
 	};
 
+
 	/*
 		*------Skeleton class and methods---------
 	*/
@@ -75,13 +76,14 @@
 	*/
 
 	//box class 12 construct
-	function Box(legend, xPos, yPos, xSize, ySize, id, color, hoverText, canIRegister, seat, status, zIndex, price, type) {
+	function Box(legend, xPos, yPos, xSize, ySize, id, color, hoverText, canIRegister, seat, status, zIndex, price, type, colorTaken) {
 		this.legend = legend;
 		this.xPosition = xPos;
 		this.yPosition = yPos;
 		this.width = xSize;
 		this.height = ySize;
 		this.color = color;
+                this.colorTaken = colorTaken;
 		this.fontColor = '#212529';
 		this.hoverText = hoverText;
 		this.id = id;
@@ -136,6 +138,12 @@
 	Box.prototype.changeColor = function(color) {
 		this.color = color;
 		this.legend = "noLegend";
+		reg.needToSave = true;
+	};
+
+	//change taken seat color
+	Box.prototype.changeTakenColor = function(color) {
+		this.colorTaken = color;
 		reg.needToSave = true;
 	};
 
@@ -296,6 +304,7 @@
 				width: Math.round(this.boxes[i].width),
 				height: Math.round(this.boxes[i].height),
 				color: this.boxes[i].color,
+                                colorTaken: this.boxes[i].colorTaken,
 				fontColor: this.boxes[i].fontColor,
 				hoverText: this.boxes[i].hoverText.replace(/<br>/g,'^'),
 				id: this.boxes[i].id,
@@ -1171,6 +1180,13 @@
 		}
 	};
 
+	//Get current Box color
+	Registration.prototype.getBoxColor = function( ) {
+		// if multiple boxes selected always the first box color is taken
+		var box = this.rooms[this.currentRoom].findAndReturnBox(this.activeBoxArray[0]);
+		return box.color;
+	};
+
 	//Change background color of a box. In case of text-box change font color
 	Registration.prototype.changeBoxColor = function(colorRGBA) {
 		if(this.action == 1) {
@@ -1207,6 +1223,20 @@
 				}
 			}
 			this.afterColorChange(oldLegends);
+		}
+	};
+
+	Registration.prototype.changeTakenBoxColor = function(colorRGBA) {
+		if(this.action == 1) {
+			var box = this.rooms[this.currentRoom].findAndReturnBox(this.activeBoxArray[0]);
+			box.changeTakenColor(colorRGBA);
+		}else if(this.action == 4) {
+			var activeBoxesLength = this.activeBoxArray.length;
+
+			for(var i = 0; i < activeBoxesLength; i++) {
+				var box = this.rooms[this.currentRoom].findAndReturnBox(this.activeBoxArray[i]);
+				box.changeTakenColor(colorRGBA);
+			}
 		}
 	};
 
@@ -2803,22 +2833,40 @@
 		}
     });
 
-    //color picket for main dialog
+
+            //color picket for main dialog
 	
 	var seatColorPicker = new Picker({
-		parent: document.querySelector('#picker'),
+		parent: document.querySelector('#picker_seat'),
 		popup: false,
 		alpha: true,
 		editor: true,
 		editorFormat: 'rgb',
 		color: '#0072CE',
+                onOpen: function (color) {
+                    color = reg.getBoxColor( );
+                },
 		onDone: function (color) {
 			reg.changeBoxColor(color.rgbaString);
 			$('#color-dialog').modal('toggle');
 			alertify.success(translator.translate('colorApplied'));	
 		},
 	});
-	
+        
+        var seatTakenColorPicker = new Picker({
+		parent: document.querySelector('#picker_seat_taken'),
+		popup: false,
+		alpha: true,
+		editor: true,
+		editorFormat: 'rgb',
+		color: '#0072CE',
+		onDone: function (color) {
+			reg.changeTakenBoxColor(color.rgbaString);
+			$('#color-dialog').modal('toggle');
+			alertify.success(translator.translate('takenColorApplied'));	
+		},
+	});
+        
     //color picker for legends
 	var legendColorPicker = new Picker({
 		parent: document.querySelector('#picker2'),
@@ -3299,7 +3347,9 @@
 	//palette icon click
 	$('.palette-call').on('click', function(){
 		if(reg.activeBoxArray.length > 0) {
-			$("#color-dialog").modal("toggle");
+		seatColorPicker.setColor( reg.getBoxColor() );	
+                $("#color-dialog").modal("toggle");
+                        
 		}else {
 			var palleteGuide = '<div><div class="guide-block">'+ translator.translate('toSelectOneBox_') +'<div class="guide-item guide-item-mouse"></div></div><br><div class="guide-block">'+ translator.translate('toSelectMultiBox_') +'<div class="guide-item guide-item-lasso"></div></div>';
 			alertify.set({ 
